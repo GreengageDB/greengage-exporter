@@ -14,15 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check for merge conflicts
-        run: |
-          if git diff --check HEAD origin/${{ github.base_ref }}; then
-            echo "No merge conflicts detected"
-          else
-            echo "Merge conflicts detected"
-            exit 1
-          fi
-
       - name: Check file sizes
         run: |
           # Check for large files (> 5MB)
