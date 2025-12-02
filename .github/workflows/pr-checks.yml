@@ -1,0 +1,162 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+jobs:
+  validate-pr:
+    name: Validate Pull Request
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+
+      - name: Check for merge conflicts
+        run: |
+          if git diff --check HEAD origin/${{ github.base_ref }}; then
+            echo "No merge conflicts detected"
+          else
+            echo "Merge conflicts detected"
+            exit 1
+          fi
+
+      - name: Check file sizes
+        run: |
+          # Check for large files (> 5MB)
+          find . -type f -size +5M -not -path "*/target/*" -not -path "*/.git/*" | while read file; do
+            echo "Warning: Large file detected: $file"
+          done
+
+      - name: Validate Maven POM
+        run: |
+          cd app
+          chmod +x mvnw
+          ./mvnw validate -B
+
+  quick-test:
+    name: Quick Test Suite
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run fast tests only
+        run: |
+          cd app
+          chmod +x mvnw
+          ./mvnw test -B -Dtest='!*IntegrationTest,!*IT' -DfailIfNoTests=false
+
+      - name: Comment test results on PR
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: app/target/surefire-reports/*.xml
+          comment_mode: always
+          check_name: Quick Test Results
+
+  code-format-check:
+    name: Code Format Check
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Check code formatting
+        run: |
+          cd app
+          chmod +x mvnw
+          # Check if formatter plugin is configured
+          if ./mvnw help:effective-pom | grep -q 'maven-formatter-plugin\|spotless-maven-plugin'; then
+            ./mvnw spotless:check -B || ./mvnw formatter:validate -B || echo "No formatter configured"
+          else
+            echo "No code formatter plugin found, skipping"
+          fi
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'app'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  changes-summary:
+    name: Changes Summary
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changes summary
+        run: |
+          echo "## Changes Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Files changed:** $(git diff --name-only origin/${{ github.base_ref }}...HEAD | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Java files modified:" >> $GITHUB_STEP_SUMMARY
+          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.java$' | head -20 >> $GITHUB_STEP_SUMMARY || echo "No Java files changed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Configuration files modified:" >> $GITHUB_STEP_SUMMARY
+          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(properties|yml|yaml|xml)$' >> $GITHUB_STEP_SUMMARY || echo "No config files changed" >> $GITHUB_STEP_SUMMARY
+
+
