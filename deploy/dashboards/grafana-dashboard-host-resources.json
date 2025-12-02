@@ -60,12 +60,8 @@
                 "value": 70
               },
               {
-                "color": "orange",
-                "value": 85
-              },
-              {
                 "color": "red",
-                "value": 95
+                "value": 90
               }
             ]
           },
@@ -103,12 +99,12 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (resourceGroupName) (greengage_host_cpu_usage_percentage{resourceGroupName=~\"$resource_group\"}) / on (resourceGroupName) group_left greengage_host_cpu_rate_limit_percentage{resourceGroupName=~\"$resource_group\"} * 100",
+          "expr": "avg by (resourceGroupName) (greengage_host_cpu_usage_percentage{resourceGroupName=~\"$resource_group\"}) / on (resourceGroupName) group_left greengage_host_cpu_rate_limit_percentage{resourceGroupName=~\"$resource_group\"} * 100",
           "legendFormat": "{{resourceGroupName}} - Usage/Limit",
           "refId": "A"
         }
       ],
-      "title": "CPU Usage vs Rate Limit (% of Limit Used)",
+      "title": "AVG CPU Usage vs Rate Limit (% of Limit Used)",
       "type": "gauge"
     },
     {
@@ -166,12 +162,8 @@
                 "value": 0
               },
               {
-                "color": "yellow",
-                "value": 70
-              },
-              {
                 "color": "red",
-                "value": 95
+                "value": 90
               }
             ]
           },
@@ -210,12 +202,12 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (resourceGroupName) (greengage_host_cpu_usage_percentage{resourceGroupName=~\"$resource_group\"}) / on (resourceGroupName) group_left greengage_host_cpu_rate_limit_percentage{resourceGroupName=~\"$resource_group\"} * 100",
+          "expr": "avg by (resourceGroupName) (greengage_host_cpu_usage_percentage{resourceGroupName=~\"$resource_group\"}) / on (resourceGroupName) group_left greengage_host_cpu_rate_limit_percentage{resourceGroupName=~\"$resource_group\"} * 100",
           "legendFormat": "{{resourceGroupName}} - % of Limit",
           "refId": "A"
         }
       ],
-      "title": "CPU Usage vs Limit Over Time (% of Limit)",
+      "title": "AVG CPU Usage vs Limit Over Time (% of Limit)",
       "type": "timeseries"
     },
     {
@@ -378,8 +370,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_host_cpu_usage_percentage{hostname=~\"$hostname\",resourceGroupName=~\"$resource_group\"}",
-          "legendFormat": "{{hostname}} - {{resourceGroupName}}",
+            "expr": "greengage_host_cpu_usage_percentage{hostname=~\"$hostname\",resourceGroupName=~\"$resource_group\"}",
+            "legendFormat": "{{hostname}} - {{resourceGroupName}} (limit: {{limit}}%)",
           "refId": "A"
         }
       ],
@@ -425,12 +417,8 @@
                 "value": 70
               },
               {
-                "color": "orange",
-                "value": 85
-              },
-              {
                 "color": "red",
-                "value": 95
+                "value": 90
               }
             ]
           },
@@ -468,101 +456,13 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (hostname, resourceGroupName) (greengage_host_mem_usage_mb{resourceGroupName=~\"$resource_group\"}) / on (resourceGroupName) group_left greengage_host_mem_limit_mb{resourceGroupName=~\"$resource_group\"} > 0 * 100",
+          "expr": "(avg by (hostname, resourceGroupName) (greengage_host_mem_usage_mb{resourceGroupName=~\"$resource_group\"})/ on (resourceGroupName) group_left greengage_host_mem_limit_mb{resourceGroupName=~\"$resource_group\"}) * 100 > 0",
           "legendFormat": "{{hostname}} - {{resourceGroupName}} - Usage/Limit",
           "refId": "A"
         }
       ],
       "title": "Memory Usage vs Limit (% of Limit Used) - LIMITED GROUPS ONLY",
       "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "description": "Resource groups with UNLIMITED memory (limit = -1 or 0). Shows absolute memory usage in MB.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "color": "text",
-                  "index": 0,
-                  "text": "All groups have limits"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": 0
-              },
-              {
-                "color": "yellow",
-                "value": 10000
-              },
-              {
-                "color": "orange",
-                "value": 20000
-              }
-            ]
-          },
-          "unit": "decmbytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 35
-      },
-      "id": 208,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "text": {
-          "titleSize": 14,
-          "valueSize": 18
-        },
-        "textMode": "value_and_name",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.2.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "sum by (hostname, resourceGroupName) (greengage_host_mem_usage_mb{resourceGroupName=~\"$resource_group\"}) * on (resourceGroupName) group_left (greengage_host_mem_limit_mb{resourceGroupName=~\"$resource_group\"} <= 0)",
-          "legendFormat": "{{hostname}} - {{resourceGroupName}} - UNLIMITED ({{value}} MB used)",
-          "refId": "A"
-        }
-      ],
-      "title": "Memory Usage - UNLIMITED Resource Groups (Absolute Values)",
-      "type": "stat"
     },
     {
       "datasource": {
@@ -601,7 +501,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 43
+        "y": 35
       },
       "id": 209,
       "options": {
@@ -663,7 +563,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 43
+        "y": 35
       },
       "id": 210,
       "options": {
@@ -725,7 +625,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 43
+        "y": 35
       },
       "id": 211,
       "options": {
@@ -818,10 +718,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 42
       },
       "id": 212,
       "options": {
@@ -849,11 +749,11 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "expr": "greengage_host_mem_usage_mb{hostname=~\"$hostname\",resourceGroupName=~\"$resource_group\"}",
-          "legendFormat": "{{hostname}} - {{resourceGroupName}}",
+          "legendFormat": "{{hostname}} - {{resourceGroupName}} (limit: {{limit}} MB)",
           "refId": "A"
         }
       ],
-      "title": "Absolute Memory Usage by Host and Resource Group",
+      "title": "Memory Usage by Host and Resource Group (with Limits)",
       "type": "timeseries"
     },
     {
@@ -862,7 +762,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 58
+        "y": 51
       },
       "id": 220,
       "panels": [],
@@ -910,7 +810,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 59
+        "y": 52
       },
       "id": 221,
       "options": {
@@ -990,7 +890,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 59
+        "y": 52
       },
       "id": 222,
       "options": {
@@ -1126,7 +1026,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 66
+        "y": 59
       },
       "id": 223,
       "options": {
@@ -1176,7 +1076,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 75
+        "y": 68
       },
       "id": 213,
       "panels": [],
@@ -1211,7 +1111,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 76
+        "y": 69
       },
       "id": 214,
       "options": {
@@ -1273,7 +1173,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 76
+        "y": 69
       },
       "id": 215,
       "options": {
@@ -1343,7 +1243,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 76
+        "y": 69
       },
       "id": 216,
       "options": {
@@ -1413,7 +1313,7 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 76
+        "y": 69
       },
       "id": 217,
       "options": {
@@ -1509,7 +1409,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 82
+        "y": 75
       },
       "id": 218,
       "options": {
@@ -1619,7 +1519,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 90
+        "y": 83
       },
       "id": 219,
       "options": {
@@ -1733,7 +1633,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 90
+        "y": 83
       },
       "id": 230,
       "options": {
@@ -1772,7 +1672,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 98
+        "y": 91
       },
       "id": 224,
       "panels": [],
@@ -1815,7 +1715,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 99
+        "y": 92
       },
       "id": 225,
       "options": {
@@ -1885,7 +1785,7 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 99
+        "y": 92
       },
       "id": 226,
       "options": {
@@ -1955,7 +1855,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 99
+        "y": 92
       },
       "id": 227,
       "options": {
@@ -2051,7 +1951,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 105
+        "y": 98
       },
       "id": 228,
       "options": {
@@ -2091,6 +1991,7 @@
   "schemaVersion": 42,
   "tags": [
     "greengage",
+    "greenplum",
     "host",
     "resources",
     "cpu",
@@ -2196,8 +2097,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Greengage - Host & Resource Group Resources",
-  "uid": "greengage-host-resources",
+  "title": "Greengage - Host & Resource Group Resources v2",
+  "uid": "greengage-host-resources-v2",
   "version": 1
 }
 
