@@ -1,0 +1,235 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'release/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        java-version: [ 17, 21 ]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better analysis
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Verify Maven Wrapper
+        run: |
+          cd app
+          chmod +x mvnw
+          ./mvnw --version
+
+      - name: Build with Maven
+        run: |
+          cd app
+          ./mvnw clean compile -B -V
+
+      - name: Run unit tests
+        run: |
+          cd app
+          ./mvnw test -B
+
+      - name: Generate test coverage report
+        if: matrix.java-version == '17'
+        run: |
+          cd app
+          ./mvnw verify -B -DskipTests
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-java-${{ matrix.java-version }}
+          path: app/target/surefire-reports/
+          retention-days: 30
+
+      - name: Upload coverage reports
+        if: matrix.java-version == '17'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-java-${{ matrix.java-version }}
+          path: app/target/site/jacoco/
+          retention-days: 30
+
+      - name: Package application
+        if: matrix.java-version == '17'
+        run: |
+          cd app
+          ./mvnw package -B -DskipTests
+
+      - name: Upload JAR artifact
+        if: matrix.java-version == '17'
+        uses: actions/upload-artifact@v4
+        with:
+          name: greengage-exporter-jar
+          path: app/target/*.jar
+          retention-days: 7
+
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Maven Checkstyle
+        continue-on-error: true
+        run: |
+          cd app
+          chmod +x mvnw
+          ./mvnw checkstyle:check -B || echo "Checkstyle warnings found"
+
+      - name: Run Maven Spotbugs
+        continue-on-error: true
+        run: |
+          cd app
+          ./mvnw spotbugs:check -B || echo "SpotBugs warnings found"
+
+      - name: Check license headers
+        continue-on-error: true
+        run: |
+          cd app
+          ./mvnw license:check -B || echo "License header issues found"
+
+      - name: Dependency vulnerability check
+        continue-on-error: true
+        run: |
+          cd app
+          ./mvnw dependency:analyze -B
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+
+  build-native:
+    name: Build Native Image
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [ build-and-test, code-quality ]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '17'
+          distribution: 'graalvm-community'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
+
+      - name: Build native image
+        run: |
+          cd app
+          chmod +x mvnw
+          ./mvnw package -Dnative -DskipTests -B \
+            -Dquarkus.native.container-build=true
+
+      - name: Upload native binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: greengage-exporter-native
+          path: app/target/*-runner
+          retention-days: 7
+
+  docker-build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    needs: [ build-and-test ]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (JVM)
+        run: |
+          cd app
+          docker build -f src/main/docker/Dockerfile.jvm -t greengage-exporter:${{ github.sha }} .
+
+      - name: Save Docker image
+        run: |
+          docker save greengage-exporter:${{ github.sha }} | gzip > greengage-exporter-jvm.tar.gz
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-jvm
+          path: greengage-exporter-jvm.tar.gz
+          retention-days: 7
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [ build-and-test ]
+    
+    steps:
+      - name: Download test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-*
+          merge-multiple: true
+          path: test-results
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: test-results/**/*.xml
+          check_name: Test Results
+          comment_mode: off
+
+

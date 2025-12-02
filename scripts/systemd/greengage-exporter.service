@@ -1,0 +1,73 @@
+# Greengage DB Exporter - systemd Service Unit File
+#
+# This is a reference/template systemd service unit file.
+# Use the install-service.sh script for automated installation,
+# or copy and customize this file manually.
+[Unit]
+Description=Greengage DB Prometheus Exporter
+Documentation=https://github.com/GreengageDB/greengage-exporter
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+# Service user/group - create with:
+#   useradd --system --shell /sbin/nologin ggexporter
+User=ggexporter
+Group=ggexporter
+
+# Environment configuration file
+# Create from env.example and place at this path
+EnvironmentFile=-/etc/greengage-exporter/greengage-exporter.conf
+
+# Working directory
+WorkingDirectory=/opt/greengage-exporter
+
+# Execution command
+# For JVM version:
+ExecStart=/opt/greengage-exporter/bin/greengage-exporter
+# For native version:
+#ExecStart=/opt/greengage-exporter/bin/greengage-exporter -Dquarkus.http.host=0.0.0.0
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Security hardening (systemd 230+)
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+
+# File system access
+ReadOnlyPaths=/
+ReadWritePaths=/var/log/greengage-exporter
+
+# Drop all capabilities
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+# Logging to journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=greengage-exporter
+
+# Resource limits - adjust based on your environment
+MemoryMax=512M
+TasksMax=100
+
+# Optional: Increase file descriptors if needed
+# LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,30 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="ilapa" id="1">
+        <sql>
+            create schema if not exists ggexporter;
+        </sql>
+    </changeSet>
+    <changeSet id="1763481831555-1" author="ilapa">
+        <sql>
+            CREATE
+            EXTERNAL WEB
+            TABLE ggexporter.gp_segment_disk_usage
+            ( dfsegment int,
+            dfhostname text,
+            dffilesystem text,
+            dftotal_kb bigint,
+            dfused_kb bigint,
+            dfavail_kb bigint,
+            dfpercent int)
+            EXECUTE 'df -Pk "$GP_SEG_DATADIR" | awk -v seg="$GP_SEGMENT_ID" -v host="$(hostname)" ''NR==2 { gsub("%",
+            "", $5); printf "%s,%s,%s,%s,%s,%s,%s\n", seg, host, $1, $2, $3, $4, $5 }'''
+            ON ALL
+            FORMAT 'CSV' (DELIMITER ',');
+        </sql>
+    </changeSet>
+</databaseChangeLog>
