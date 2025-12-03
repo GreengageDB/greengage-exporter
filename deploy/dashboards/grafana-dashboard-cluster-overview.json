@@ -107,7 +107,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_up",
+          "expr": "greengage_up{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -166,7 +166,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_uptime_seconds",
+          "expr": "greengage_cluster_uptime_seconds{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -225,7 +225,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_server_database_count",
+          "expr": "greengage_server_database_count{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -284,7 +284,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_host_total_database_size_mb",
+          "expr": "greengage_host_total_database_size_mb{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -360,7 +360,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "(greengage_cluster_connections_all_states_total / greengage_cluster_max_connections) * 100",
+          "expr": "(greengage_cluster_connections_all_states_total{cluster=~\"$cluster\"} / greengage_cluster_max_connections{cluster=~\"$cluster\"}) * 100",
           "refId": "A"
         }
       ],
@@ -427,7 +427,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_server_locked_sessions_total",
+          "expr": "greengage_server_locked_sessions_total{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -499,7 +499,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_segments_total",
+          "expr": "greengage_cluster_segments_total{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -558,7 +558,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_segments_up",
+          "expr": "greengage_cluster_segments_up{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -621,7 +621,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_segments_down",
+          "expr": "greengage_cluster_segments_down{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -711,7 +711,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_segment_status",
+          "expr": "greengage_cluster_segment_status{cluster=~\"$cluster\"}",
           "legendFormat": "{{hostname}}:{{port}} (content={{content}}, role={{role}})",
           "refId": "A"
         }
@@ -815,7 +815,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_connections_total",
+          "expr": "greengage_cluster_connections_total{cluster=~\"$cluster\"}",
           "legendFormat": "{{state}}",
           "refId": "A"
         }
@@ -914,7 +914,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_query_active_queries_total",
+          "expr": "greengage_query_active_queries_total{cluster=~\"$cluster\"}",
           "legendFormat": "Total Active Queries",
           "refId": "A"
         },
@@ -923,7 +923,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_query_active_queries_slow",
+          "expr": "greengage_query_active_queries_slow{cluster=~\"$cluster\"}",
           "legendFormat": "Slow Queries (>180s)",
           "refId": "B"
         },
@@ -932,7 +932,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_query_waiting_count",
+          "expr": "greengage_cluster_query_waiting_count{cluster=~\"$cluster\"}",
           "legendFormat": "Waiting for Locks",
           "refId": "C"
         }
@@ -1022,7 +1022,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_query_active_queries_duration_bucket",
+          "expr": "greengage_query_active_queries_duration_bucket{cluster=~\"$cluster\"}",
           "legendFormat": "{{bucket}}",
           "refId": "A"
         }
@@ -1134,7 +1134,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_replication_lag_bytes",
+          "expr": "greengage_cluster_replication_lag_bytes{cluster=~\"$cluster\"}",
           "legendFormat": "{{host}} content={{content}}",
           "refId": "A"
         }
@@ -1202,7 +1202,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_replication_max_lag_bytes",
+          "expr": "greengage_cluster_replication_max_lag_bytes{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -1233,6 +1233,33 @@
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(greengage_up, cluster)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Cluster",
+        "multi": true,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(greengage_up, cluster)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
       }
     ]
   },
@@ -1247,4 +1274,3 @@
   "version": 1,
   "weekStart": ""
 }
-

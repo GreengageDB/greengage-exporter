@@ -95,7 +95,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_query_active_queries_total",
+          "expr": "greengage_query_active_queries_total{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -162,7 +162,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_query_active_queries_slow",
+          "expr": "greengage_query_active_queries_slow{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -229,7 +229,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_query_waiting_count",
+          "expr": "greengage_cluster_query_waiting_count{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -296,7 +296,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_server_locked_sessions_total",
+          "expr": "greengage_server_locked_sessions_total{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -426,8 +426,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_query_active_queries_total",
-          "legendFormat": "Total Active Queries",
+          "expr": "greengage_query_active_queries_total{cluster=~\"$cluster\"}",
+          "legendFormat": "{{cluster}} - Total Active Queries",
           "refId": "A"
         },
         {
@@ -435,8 +435,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_query_active_queries_slow",
-          "legendFormat": "Slow Queries (>180s)",
+          "expr": "greengage_query_active_queries_slow{cluster=~\"$cluster\"}",
+          "legendFormat": "{{cluster}} - Slow Queries (>180s)",
           "refId": "B"
         },
         {
@@ -444,8 +444,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_query_waiting_count",
-          "legendFormat": "Waiting for Locks",
+          "expr": "greengage_cluster_query_waiting_count{cluster=~\"$cluster\"}",
+          "legendFormat": "{{cluster}} - Waiting for Locks",
           "refId": "C"
         }
       ],
@@ -548,8 +548,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_query_active_queries_duration_bucket",
-          "legendFormat": "{{bucket}}",
+          "expr": "greengage_query_active_queries_duration_bucket{cluster=~\"$cluster\"}",
+          "legendFormat": "{{cluster}} - {{bucket}}",
           "refId": "A"
         }
       ],
@@ -695,7 +695,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_query_active_queries_duration_bucket",
+          "expr": "greengage_query_active_queries_duration_bucket{cluster=~\"$cluster\"}",
           "legendFormat": "{{bucket}}",
           "refId": "A"
         }
@@ -776,7 +776,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_connections_all_states_total",
+          "expr": "greengage_cluster_connections_all_states_total{cluster=~\"$cluster\"}",
           "refId": "A"
         }
       ],
@@ -835,7 +835,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_connections_total{state=\"active\"}",
+          "expr": "greengage_cluster_connections_total{cluster=~\"$cluster\",state=\"active\"}",
           "refId": "A"
         }
       ],
@@ -894,7 +894,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_connections_total{state=\"idle\"}",
+          "expr": "greengage_cluster_connections_total{cluster=~\"$cluster\",state=\"idle\"}",
           "refId": "A"
         }
       ],
@@ -985,8 +985,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_connections_total",
-          "legendFormat": "{{state}}",
+          "expr": "greengage_cluster_connections_total{cluster=~\"$cluster\"}",
+          "legendFormat": "{{cluster}} - {{state}}",
           "refId": "A"
         }
       ],
@@ -1098,8 +1098,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_cluster_query_waiting_count",
-          "legendFormat": "Queries Waiting for Locks",
+          "expr": "greengage_cluster_query_waiting_count{cluster=~\"$cluster\"}",
+          "legendFormat": "{{cluster}} - Queries Waiting for Locks",
           "refId": "A"
         }
       ],
@@ -1198,8 +1198,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_server_locked_sessions_total",
-          "legendFormat": "Total Locked Sessions",
+          "expr": "greengage_server_locked_sessions_total{cluster=~\"$cluster\"}",
+          "legendFormat": "{{cluster}} - Total Locked Sessions",
           "refId": "A"
         }
       ],
@@ -1286,9 +1286,9 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_server_lock_wait_max_wait_seconds{database=~\"$database\"}",
+          "expr": "greengage_server_lock_wait_max_wait_seconds{cluster=~\"$cluster\",database=~\"$database\"}",
           "instant": true,
-          "legendFormat": "{{lock_type}} - {{mode}} (segment={{content}})",
+          "legendFormat": "{{cluster}} - {{lock_type}} - {{mode}} (segment={{content}})",
           "refId": "A"
         }
       ],
@@ -1362,9 +1362,9 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_server_lock_waiting_queries{database=~\"$database\"}",
+          "expr": "greengage_server_lock_waiting_queries{cluster=~\"$cluster\",database=~\"$database\"}",
           "instant": true,
-          "legendFormat": "{{lock_type}} - {{mode}} (segment={{content}})",
+          "legendFormat": "{{cluster}} - {{lock_type}} - {{mode}} (segment={{content}})",
           "refId": "A"
         }
       ],
@@ -1406,7 +1406,34 @@
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(greengage_server_lock_waiting_queries, database)",
+        "definition": "label_values(greengage_up, cluster)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Cluster",
+        "multi": true,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(greengage_up, cluster)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(greengage_server_lock_waiting_queries{cluster=~\"$cluster\"}, database)",
         "hide": 0,
         "includeAll": true,
         "label": "Database",
@@ -1414,7 +1441,7 @@
         "name": "database",
         "options": [],
         "query": {
-          "query": "label_values(greengage_server_lock_waiting_queries, database)",
+          "query": "label_values(greengage_server_lock_waiting_queries{cluster=~\"$cluster\"}, database)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -1436,4 +1463,3 @@
   "version": 1,
   "weekStart": ""
 }
-

@@ -12,5 +12,4 @@ scrape_configs:
     static_configs:
       - targets: ['greengage-exporter:8080']
         labels:
-          instance: 'greengage-cluster'
-          environment: 'production'
+          cluster: 'main'
