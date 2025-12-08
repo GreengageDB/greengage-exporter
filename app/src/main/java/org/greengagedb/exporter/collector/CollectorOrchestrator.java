@@ -285,8 +285,9 @@ public class CollectorOrchestrator {
         } catch (Exception e) {
             handleCollectorFailure(collector, context, e, logSuffix);
         } finally {
-            long duration = System.currentTimeMillis() - collectionStart;
-            log.debug("Collector {}{} completed in {} ms", collector.getName(), logSuffix, duration);
+            long durationMs = System.currentTimeMillis() - collectionStart;
+            exporterMetrics.recordCollectorDuration(collector.getName(), Duration.ofMillis(durationMs));
+            log.debug("Collector {}{} completed in {} ms", collector.getName(), logSuffix, durationMs);
         }
     }
 

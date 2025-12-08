@@ -28,6 +28,8 @@ import org.greengagedb.exporter.common.MetricNameBuilder;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -40,12 +42,14 @@ public class ExporterMetrics {
     private static final String NAME_TOTAL_SCRAPED = MetricNameBuilder.build(Constants.SUBSYSTEM_EXPORTER, "total_scraped");
     private static final String NAME_TOTAL_ERROR = MetricNameBuilder.build(Constants.SUBSYSTEM_EXPORTER, "total_error");
     private static final String NAME_COLLECTOR_ERROR = MetricNameBuilder.build(Constants.SUBSYSTEM_EXPORTER, "collector_error");
+    private static final String NAME_COLLECTOR_DURATION = MetricNameBuilder.build(Constants.SUBSYSTEM_EXPORTER, "collector_duration_seconds");
     private static final String NAME_SCRAPE_DURATION = MetricNameBuilder.build(Constants.SUBSYSTEM_EXPORTER, "scrape_duration_seconds");
     private static final String NAME_UPTIME = MetricNameBuilder.build(Constants.SUBSYSTEM_EXPORTER, "uptime_seconds");
     private static final String NAME_UP = MetricNameBuilder.build("up");
 
     private final AtomicReference<Double> databaseUpGaugeValue = new AtomicReference<>(0.0);
     private final Instant startTime = Instant.now();
+    private final Map<String, AtomicReference<Double>> collectorDurations = new ConcurrentHashMap<>();
 
     private final MeterRegistry registry;
 
@@ -122,6 +126,26 @@ public class ExporterMetrics {
 
     public void recordScrapeDuration(Duration duration) {
         scrapeDurationTimer.record(duration);
+    }
+
+    /**
+     * Record the execution duration of a specific collector.
+     * This helps identify slow collectors and performance bottlenecks.
+     *
+     * @param collectorName Name of the collector
+     * @param duration      Execution duration
+     */
+    public void recordCollectorDuration(String collectorName, Duration duration) {
+        double durationMs = duration.toMillis();
+        
+        collectorDurations.computeIfAbsent(collectorName, name -> {
+            AtomicReference<Double> ref = new AtomicReference<>(0.0);
+            Gauge.builder(NAME_COLLECTOR_DURATION, ref::get)
+                    .tag("collector", name)
+                    .description("Last execution duration per collector in milliseconds")
+                    .register(registry);
+            return ref;
+        }).set(durationMs);
     }
 
     public void setGreengageUp(boolean up) {
