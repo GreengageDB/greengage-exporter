@@ -1238,6 +1238,23 @@ rate(greengage_exporter_total_error_total[5m]) > 0.1
 
 ---
 
+### greengage_exporter_collector_duration_seconds
+
+**Type:** Gauge  
+**Description:** Last execution duration per collector in milliseconds. Helps identify slow collectors and performance bottlenecks.  
+**Unit:** milliseconds  
+**Labels:**
+- `collector` - Name of the collector (e.g., `segment`, `locks`, `database_size`, `replication_monitor`)
+
+**Example:**
+```
+greengage_exporter_collector_duration_seconds{collector="segment"} 150.0
+greengage_exporter_collector_duration_seconds{collector="locks"} 45.0
+greengage_exporter_collector_duration_seconds{collector="replication_monitor"} 320.0
+```
+
+---
+
 ### greengage_exporter_collector_error_total
 
 **Type:** Counter  
