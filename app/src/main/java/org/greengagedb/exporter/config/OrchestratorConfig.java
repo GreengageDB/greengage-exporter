@@ -21,7 +21,7 @@ import io.smallrye.config.WithDefault;
 import java.time.Duration;
 
 /**
- * Configuration for orchestrator behavior including retry logic and circuit breakers.
+ * Configuration for orchestrator behavior including retry logic and fail-fast settings.
  */
 @ConfigMapping(prefix = "app.orchestrator")
 public interface OrchestratorConfig {
@@ -55,20 +55,22 @@ public interface OrchestratorConfig {
 
     /**
      * Number of collector failures before assuming database issue
-     * and stopping the scrape early (circuit breaker pattern).
+     * and stopping the scrape early (fail-fast pattern).
      *
      * @return Failure threshold (default: 3)
      */
     @WithDefault("3")
-    int collectorFailureThreshold();
+    int scrapeFailureThreshold();
 
     /**
-     * Whether to enable the circuit breaker for collector failures.
+     * Whether to enable fail-fast for collector failures.
+     * When enabled, if multiple collectors fail during a scrape,
+     * the scrape stops early assuming a database issue.
      * If disabled, all collectors will always run even if some fail.
      *
-     * @return true to enable circuit breaker (default: true)
+     * @return true to enable fail-fast (default: true)
      */
     @WithDefault("true")
-    boolean circuitBreakerEnabled();
+    boolean scrapeFailFastEnabled();
 }
 

@@ -108,11 +108,12 @@ The orchestrator manages collector execution, retries, and circuit breaker patte
 | `app.orchestrator.scrape-cache-max-age`        | `ORCHESTRATOR_CACHE_MAX_AGE`     | `30s`   | Maximum age of cached scrape results before considered stale            |
 | `app.orchestrator.connection-retry-attempts`   | `ORCHESTRATOR_RETRY_ATTEMPTS`    | `3`     | Number of retry attempts for database connection failures               |
 | `app.orchestrator.connection-retry-delay`      | `ORCHESTRATOR_RETRY_DELAY`       | `1s`    | Base delay between connection retry attempts (uses exponential backoff) |
-| `app.orchestrator.collector-failure-threshold` | `ORCHESTRATOR_FAILURE_THRESHOLD` | `3`     | Number of collector failures before triggering circuit breaker          |
-| `app.orchestrator.circuit-breaker-enabled`     | `ORCHESTRATOR_CIRCUIT_BREAKER`   | `true`  | Enable circuit breaker for collector failures                           |
+| `app.orchestrator.scrape-failure-threshold`    | `ORCHESTRATOR_FAILURE_THRESHOLD` | `3`     | Number of collector failures before triggering fail-fast                |
+| `app.orchestrator.scrape-fail-fast-enabled`    | `ORCHESTRATOR_FAIL_FAST`         | `true`  | Enable fail-fast for collector failures during scrape                   |
 
-**Circuit Breaker Behavior**: When enabled, the orchestrator will stop executing remaining collectors after the failure
+**Fail-Fast Behavior**: When enabled, the orchestrator will stop executing remaining collectors after the failure
 threshold is reached during a scrape cycle. This prevents cascading failures and reduces load on an unhealthy database.
+The failure counter resets between scrapes.
 
 ### Metrics Exposition Settings
 

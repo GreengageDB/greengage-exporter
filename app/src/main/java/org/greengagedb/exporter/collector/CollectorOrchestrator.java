@@ -217,8 +217,8 @@ public class CollectorOrchestrator {
     private void collectFromAll(GreengageVersion version) throws SQLException {
         try (Connection connection = databaseService.getPoolledConnection()) {
             CollectorExecutionContext context = new CollectorExecutionContext(
-                    config.collectorFailureThreshold(),
-                    config.circuitBreakerEnabled()
+                    config.scrapeFailureThreshold(),
+                    config.scrapeFailFastEnabled()
             );
 
             // Execute GENERAL collectors on main connection
@@ -247,7 +247,7 @@ public class CollectorOrchestrator {
 
     /**
      * Execute collectors that work on per-database connections.
-     * Ensures proper cleanup of temporary DataSources even if circuit breaker is triggered.
+     * Ensures proper cleanup of temporary DataSources even if fail-fast is triggered.
      */
     private void executePerDbCollectors(List<Collector> collectors, Connection baseConnection,
                                         GreengageVersion version, CollectorExecutionContext context) throws SQLException {
@@ -268,13 +268,13 @@ public class CollectorOrchestrator {
                 }
             }
         } finally {
-            // Ensure cleanup happens even if circuit breaker is triggered
+            // Ensure cleanup happens even if fail-fast is triggered
             connectionProvider.cleanup();
         }
     }
 
     /**
-     * Execute a single collector with error handling and circuit breaker logic.
+     * Execute a single collector with error handling and fail-fast logic.
      */
     private void executeCollector(Collector collector, Connection connection, GreengageVersion version,
                                   CollectorExecutionContext context, String logSuffix) throws SQLException {
@@ -292,7 +292,7 @@ public class CollectorOrchestrator {
     }
 
     /**
-     * Handle collector failure with circuit breaker logic.
+     * Handle collector failure with fail-fast logic.
      */
     private void handleCollectorFailure(Collector collector, CollectorExecutionContext context,
                                         Exception e, String logSuffix) throws SQLException {
@@ -302,9 +302,9 @@ public class CollectorOrchestrator {
         exporterMetrics.incrementTotalError();
         exporterMetrics.incrementCollectorError(collector.getName());
 
-        // Circuit breaker: if too many collectors fail, assume DB issue
-        if (context.circuitBreakerEnabled && context.failures >= context.failureThreshold) {
-            log.error("Too many collector failures ({}), circuit breaker triggered - " +
+        // Fail-fast: if too many collectors fail, assume DB issue and stop scrape
+        if (context.failFastEnabled && context.failures >= context.failureThreshold) {
+            log.error("Too many collector failures ({}), fail-fast triggered - " +
                     "assuming database issue, stopping remaining collectors", context.failures);
             throw new SQLException("Multiple collectors failed, possible database issue", e);
         }
@@ -326,16 +326,16 @@ public class CollectorOrchestrator {
     }
 
     /**
-     * Context for tracking collector execution state.
+     * Context for tracking collector execution state during a single scrape.
      */
     private static class CollectorExecutionContext {
         private final int failureThreshold;
-        private final boolean circuitBreakerEnabled;
+        private final boolean failFastEnabled;
         private int failures = 0;
 
-        CollectorExecutionContext(int failureThreshold, boolean circuitBreakerEnabled) {
+        CollectorExecutionContext(int failureThreshold, boolean failFastEnabled) {
             this.failureThreshold = failureThreshold;
-            this.circuitBreakerEnabled = circuitBreakerEnabled;
+            this.failFastEnabled = failFastEnabled;
         }
     }
 }
