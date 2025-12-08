@@ -48,9 +48,6 @@ All Greengage DB metrics follow the pattern: `greengage_<subsystem>_<metric_name
 ```
 greengage_up 1.0
 ```
-
-**Alerting:** Alert when `greengage_up == 0` for more than 1 minute.
-
 ---
 
 ### greengage_cluster_state
@@ -81,9 +78,6 @@ greengage_cluster_state{master="greengage-master-1.internal",standby="",version=
 ```
 greengage_cluster_uptime_seconds 33848.306563
 ```
-
-**Usage:** Calculate uptime: `greengage_cluster_uptime_seconds / 3600 / 24` for days.
-
 ---
 
 ### greengage_cluster_max_connections
@@ -96,9 +90,6 @@ greengage_cluster_uptime_seconds 33848.306563
 ```
 greengage_cluster_max_connections 250.0
 ```
-
-**Alerting:** Alert when `greengage_cluster_connections_all_states_total / greengage_cluster_max_connections > 0.8` (80% capacity).
-
 ---
 
 ### greengage_cluster_config_last_load_time_seconds
@@ -112,9 +103,6 @@ greengage_cluster_max_connections 250.0
 ```
 greengage_cluster_config_last_load_time_seconds 1.764592546603E9
 ```
-
-**Usage:** Convert to datetime: `FROM_UNIXTIME(greengage_cluster_config_last_load_time_seconds)`.
-
 ---
 
 ### greengage_cluster_sync
@@ -151,9 +139,6 @@ greengage_cluster_sync 0.0
 greengage_cluster_segment_status{content="0",dbid="2",hostname="host-1.internal",port="10000",preferred_role="p",role="p"} 1.0
 greengage_cluster_segment_status{content="0",dbid="10",hostname="host-2.internal",port="10500",preferred_role="m",role="m"} 1.0
 ```
-
-**Alerting:** Alert when `greengage_cluster_segment_status == 0`.
-
 ---
 
 ### greengage_cluster_segment_role
@@ -187,9 +172,6 @@ greengage_cluster_segment_role{content="0",dbid="2",hostname="host-1.internal",p
 greengage_cluster_segment_mode{content="0",dbid="2",hostname="host-1.internal",port="10000",preferred_role="p",role="p"} 1.0
 greengage_cluster_segment_mode{content="-1",dbid="1",hostname="master.internal",port="5432",preferred_role="p",role="p"} 4.0
 ```
-
-**Alerting:** Alert when `greengage_cluster_segment_mode > 1` (not synchronized).
-
 ---
 
 ### greengage_cluster_segments_total
@@ -228,9 +210,6 @@ greengage_cluster_segments_up 17.0
 ```
 greengage_cluster_segments_down 0.0
 ```
-
-**Alerting:** Alert when `greengage_cluster_segments_down > 0`.
-
 ---
 
 ## Connection Metrics
@@ -248,11 +227,6 @@ greengage_cluster_connections_total{state="idle"} 5.0
 greengage_cluster_connections_total{state="active"} 2.0
 greengage_cluster_connections_total{state="idle in transaction"} 0.0
 ```
-
-**Usage:**
-- Monitor idle connections: `greengage_cluster_connections_total{state="idle"}`
-- Monitor stuck transactions: `greengage_cluster_connections_total{state="idle in transaction"}`
-
 ---
 
 ### greengage_cluster_connections_all_states_total
@@ -265,12 +239,6 @@ greengage_cluster_connections_total{state="idle in transaction"} 0.0
 ```
 greengage_cluster_connections_all_states_total 7.0
 ```
-
-**Alerting:** Alert when approaching max connections:
-```promql
-greengage_cluster_connections_all_states_total / greengage_cluster_max_connections > 0.8
-```
-
 ---
 
 ## Lock Metrics
@@ -285,9 +253,6 @@ greengage_cluster_connections_all_states_total / greengage_cluster_max_connectio
 ```
 greengage_cluster_query_waiting_count 0.0
 ```
-
-**Alerting:** Alert when `greengage_cluster_query_waiting_count > 10` for extended periods.
-
 ---
 
 ### greengage_server_locked_sessions_count
@@ -336,12 +301,6 @@ greengage_server_locked_sessions_total 4.0
 greengage_cluster_replication_lag_bytes{application_name="gp_walreceiver",content="0",host="host-1.internal",scope="segment"} 0.0
 greengage_cluster_replication_lag_bytes{application_name="gp_walreceiver",content="1",host="host-1.internal",scope="segment"} 2048.0
 ```
-
-**Alerting:** Alert when lag exceeds threshold:
-```promql
-greengage_cluster_replication_lag_bytes > 10485760  # 10MB
-```
-
 ---
 
 ### greengage_cluster_replication_write_lag_bytes
@@ -383,9 +342,6 @@ greengage_cluster_replication_flush_lag_bytes{application_name="gp_walreceiver",
 ```
 greengage_cluster_replication_max_lag_bytes 2048.0
 ```
-
-**Alerting:** Alert when `greengage_cluster_replication_max_lag_bytes > 10485760` (10MB).
-
 ---
 
 ### greengage_cluster_replication_state
@@ -451,9 +407,6 @@ greengage_query_active_queries_total 5.0
 ```
 greengage_query_active_queries_slow 2.0
 ```
-
-**Alerting:** Alert when `greengage_query_active_queries_slow > 5`.
-
 ---
 
 ### greengage_query_active_queries_duration_bucket
@@ -476,9 +429,6 @@ greengage_query_active_queries_duration_bucket{bucket="60_180"} 1.0
 greengage_query_active_queries_duration_bucket{bucket="180_600"} 0.0
 greengage_query_active_queries_duration_bucket{bucket="600_plus"} 0.0
 ```
-
-**Usage:** Visualize query distribution in Grafana using stacked graphs.
-
 ---
 
 ## Host Resource Metrics
@@ -525,12 +475,6 @@ greengage_host_disk_used_kb{hostname="host-1.internal"} 1.8798436E7
 ```
 greengage_host_disk_available_kb{hostname="host-1.internal"} 8.2126444E7
 ```
-
-**Alerting:** Alert when available space is low:
-```promql
-greengage_host_disk_available_kb < 10485760  # Less than 10GB
-```
-
 ---
 
 ### greengage_host_disk_usage_percent
@@ -545,9 +489,6 @@ greengage_host_disk_available_kb < 10485760  # Less than 10GB
 ```
 greengage_host_disk_usage_percent{hostname="host-1.internal"} 19.0
 ```
-
-**Alerting:** Alert when `greengage_host_disk_usage_percent > 85`.
-
 ---
 
 ### greengage_host_max_disk_total_kb
@@ -631,9 +572,6 @@ greengage_host_disk_used_kb_skew_ratio 1.002
 greengage_host_disk_available_kb_skew_ratio 1.001
 greengage_host_disk_usage_percent_skew_ratio 1.0
 ```
-
-**Alerting:** Alert when skew > 1.5 (significant imbalance).
-
 ---
 
 ### greengage_host_cpu_usage_percentage
@@ -791,9 +729,6 @@ greengage_host_num_running_sessions{resourceGroupName="admin_group"} 1.0
 ```
 greengage_host_num_queueing_sessions{resourceGroupName="default_group"} 0.0
 ```
-
-**Alerting:** Alert when `greengage_host_num_queueing_sessions > 0` for extended periods.
-
 ---
 
 ### greengage_host_spill_usage_bytes
@@ -809,9 +744,6 @@ greengage_host_num_queueing_sessions{resourceGroupName="default_group"} 0.0
 greengage_host_spill_usage_bytes{hostname="host-1.internal"} 0.0
 greengage_host_spill_usage_bytes{hostname="host-2.internal"} 104857600.0
 ```
-
-**Usage:** High spill indicates queries need more memory or better optimization.
-
 ---
 
 ### greengage_host_max_spill_usage
@@ -860,9 +792,6 @@ greengage_host_spill_usage_skew_ratio 0.0
 ```
 greengage_database_table_dead_tuple_ratio{database="mydb",schema="public",table="orders"} 0.15
 ```
-
-**Alerting:** Alert when `greengage_database_table_dead_tuple_ratio > 0.2` (20% dead tuples).
-
 ---
 
 ### greengage_database_table_seconds_since_last_vacuum
@@ -879,10 +808,6 @@ greengage_database_table_dead_tuple_ratio{database="mydb",schema="public",table=
 ```
 greengage_database_table_seconds_since_last_vacuum{database="mydb",schema="public",table="orders"} 25195.0
 ```
-
-**Usage:** Convert to hours: `greengage_database_table_seconds_since_last_vacuum / 3600`.  
-**Alerting:** Alert when exceeds 24 hours for high-churn tables.
-
 ---
 
 ### greengage_database_table_seconds_since_last_autovacuum
@@ -976,9 +901,6 @@ greengage_database_db_avg_dead_tuple_ratio{datname="mydb"} 0.05
 ```
 greengage_database_db_max_dead_tuple_ratio{datname="mydb"} 0.15
 ```
-
-**Alerting:** Alert when `greengage_database_db_max_dead_tuple_ratio > 0.3`.
-
 ---
 
 ### greengage_server_vacuum_running
@@ -1009,9 +931,6 @@ greengage_server_vacuum_running 0.0
 ```
 greengage_server_vacuum_running_seconds{datname="mydb",usename="gpadmin",pid="12345"} 120.0
 ```
-
-**Usage:** Identifies long-running vacuum operations.
-
 ---
 
 ## Table Health Metrics
@@ -1035,10 +954,6 @@ greengage_server_vacuum_running_seconds{datname="mydb",usename="gpadmin",pid="12
 greengage_server_table_bloat_state{database="mydb",schema="public",table="orders"} 0.0
 greengage_server_table_bloat_state{database="mydb",schema="public",table="old_archive"} 2.0
 ```
-
-**Alerting:** Alert when `greengage_server_table_bloat_state == 2` (severe bloat).  
-**Remediation:** Run `VACUUM FULL` or recreate table.
-
 ---
 
 ### greengage_server_table_skew_factor
@@ -1062,12 +977,6 @@ greengage_server_table_bloat_state{database="mydb",schema="public",table="old_ar
 greengage_server_table_skew_factor{database="mydb",schema="public",table="orders"} 1.2
 greengage_server_table_skew_factor{database="mydb",schema="public",table="config"} 282.8
 ```
-
-**Alerting:** Alert when `greengage_server_table_skew_factor > 5` for large tables.  
-**Remediation:** Review distribution key and consider redistributing table.
-
-**Note:** Only top 10 most skewed tables are reported (with skew > 0.1).
-
 ---
 
 ## Database Size Metrics
@@ -1085,9 +994,6 @@ greengage_server_table_skew_factor{database="mydb",schema="public",table="config
 greengage_host_database_name_mb_size{dbname="mydb"} 3325.0
 greengage_host_database_name_mb_size{dbname="postgres"} 150.0
 ```
-
-**Usage:** Monitor database growth over time.
-
 ---
 
 ### greengage_host_total_database_size_mb
@@ -1136,12 +1042,6 @@ greengage_gpbackup_backup_count{database="mydb",status="success",type="full"} 10
 greengage_gpbackup_backup_count{database="mydb",status="success",type="incremental"} 25.0
 greengage_gpbackup_backup_count{database="mydb",status="failure",type="incremental"} 1.0
 ```
-
-**Usage:** Track backup success rates:
-```promql
-rate(greengage_gpbackup_backup_count{status="success"}[1d])
-```
-
 ---
 
 ### greengage_gpbackup_last_backup_duration_seconds
@@ -1160,10 +1060,6 @@ greengage_gpbackup_last_backup_duration_seconds{database="mydb",incremental="0",
 greengage_gpbackup_last_backup_duration_seconds{database="mydb",incremental="1",status="success"} 45.0
 greengage_gpbackup_last_backup_duration_seconds{database="mydb",incremental="1",status="failure"} 7.0
 ```
-
-**Usage:** Monitor backup performance and identify slow backups.  
-**Alerting:** Alert if backup duration increases significantly.
-
 ---
 
 ### greengage_gpbackup_seconds_since_last_backup_completion
@@ -1180,12 +1076,6 @@ greengage_gpbackup_last_backup_duration_seconds{database="mydb",incremental="1",
 greengage_gpbackup_seconds_since_last_backup_completion{database="mydb",incremental="full"} 50703.0
 greengage_gpbackup_seconds_since_last_backup_completion{database="mydb",incremental="incremental"} 3600.0
 ```
-
-**Usage:** Convert to hours: `greengage_gpbackup_seconds_since_last_backup_completion / 3600`.  
-**Alerting:**
-- Alert if no full backup in 7 days: `greengage_gpbackup_seconds_since_last_backup_completion{incremental="full"} > 604800`
-- Alert if no incremental backup in 24 hours: `greengage_gpbackup_seconds_since_last_backup_completion{incremental="incremental"} > 86400`
-
 ---
 
 ## Exporter Internal Metrics
@@ -1212,12 +1102,6 @@ greengage_exporter_uptime_seconds 86400.0
 ```
 greengage_exporter_total_scraped_total 938.0
 ```
-
-**Usage:** Track exporter uptime and scrape rate:
-```promql
-rate(greengage_exporter_total_scraped_total[5m])
-```
-
 ---
 
 ### greengage_exporter_total_error_total
@@ -1229,11 +1113,6 @@ rate(greengage_exporter_total_scraped_total[5m])
 **Example:**
 ```
 greengage_exporter_total_error_total 0.0
-```
-
-**Alerting:** Alert when error rate is high:
-```promql
-rate(greengage_exporter_total_error_total[5m]) > 0.1
 ```
 
 ---
@@ -1268,17 +1147,6 @@ greengage_exporter_collector_error_total{collector="segment"} 0.0
 greengage_exporter_collector_error_total{collector="locks"} 2.0
 greengage_exporter_collector_error_total{collector="replication_monitor"} 0.0
 ```
-
-**Usage:** Identify problematic collectors:
-```promql
-topk(5, greengage_exporter_collector_error_total)
-```
-
-**Alerting:** Alert when a specific collector is failing repeatedly:
-```promql
-increase(greengage_exporter_collector_error_total[1h]) > 5
-```
-
 ---
 
 ### greengage_exporter_scrape_duration_seconds
@@ -1296,14 +1164,6 @@ greengage_exporter_scrape_duration_seconds_sum 7897.27781061
 greengage_exporter_scrape_duration_seconds_max 10.081908068
 ```
 
-**Usage:**
-- Average scrape duration: `greengage_exporter_scrape_duration_seconds_sum / greengage_exporter_scrape_duration_seconds_count`
-- Scrape rate: `rate(greengage_exporter_scrape_duration_seconds_count[5m])`
-
-**Alerting:** Alert if scrape duration exceeds scrape interval (indicates slow scrapes):
-```promql
-greengage_exporter_scrape_duration_seconds_max > 15
-```
 ---
 ## Version Compatibility
 
