@@ -299,6 +299,7 @@ public class CollectorOrchestrator {
         log.error("Error collecting metrics from {}{} ({}/{} failures): {}",
                 collector.getName(), logSuffix, context.failures, context.failureThreshold, e.getMessage(), e);
         exporterMetrics.incrementTotalError();
+        exporterMetrics.incrementCollectorError(collector.getName());
 
         // Circuit breaker: if too many collectors fail, assume DB issue
         if (context.circuitBreakerEnabled && context.failures >= context.failureThreshold) {

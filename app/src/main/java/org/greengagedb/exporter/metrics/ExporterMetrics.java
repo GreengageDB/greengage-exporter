@@ -27,6 +27,7 @@ import org.greengagedb.exporter.common.Constants;
 import org.greengagedb.exporter.common.MetricNameBuilder;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -38,10 +39,13 @@ public class ExporterMetrics {
 
     private static final String NAME_TOTAL_SCRAPED = MetricNameBuilder.build(Constants.SUBSYSTEM_EXPORTER, "total_scraped");
     private static final String NAME_TOTAL_ERROR = MetricNameBuilder.build(Constants.SUBSYSTEM_EXPORTER, "total_error");
+    private static final String NAME_COLLECTOR_ERROR = MetricNameBuilder.build(Constants.SUBSYSTEM_EXPORTER, "collector_error");
     private static final String NAME_SCRAPE_DURATION = MetricNameBuilder.build(Constants.SUBSYSTEM_EXPORTER, "scrape_duration_seconds");
+    private static final String NAME_UPTIME = MetricNameBuilder.build(Constants.SUBSYSTEM_EXPORTER, "uptime_seconds");
     private static final String NAME_UP = MetricNameBuilder.build("up");
 
     private final AtomicReference<Double> databaseUpGaugeValue = new AtomicReference<>(0.0);
+    private final Instant startTime = Instant.now();
 
     private final MeterRegistry registry;
 
@@ -60,6 +64,7 @@ public class ExporterMetrics {
         registerScrapeErrorCounter();
         registerDatabaseUpGauge();
         registerScrapeDurationTimer();
+        registerUptimeGauge();
         log.info("Exporter metrics initialized");
     }
 
@@ -87,12 +92,32 @@ public class ExporterMetrics {
                 .register(registry);
     }
 
+    private void registerUptimeGauge() {
+        Gauge.builder(NAME_UPTIME, () -> Duration.between(startTime, Instant.now()).toSeconds())
+                .description("Duration in seconds since the exporter started")
+                .register(registry);
+    }
+
     public void incrementTotalScraped() {
         scrapeSuccessCounter.increment();
     }
 
     public void incrementTotalError() {
         scrapeErrorCounter.increment();
+    }
+
+    /**
+     * Increment error counter for a specific collector.
+     * This helps identify which collector is causing issues.
+     *
+     * @param collectorName Name of the collector that failed
+     */
+    public void incrementCollectorError(String collectorName) {
+        Counter.builder(NAME_COLLECTOR_ERROR)
+                .tag("collector", collectorName)
+                .description("Number of errors per collector")
+                .register(registry)
+                .increment();
     }
 
     public void recordScrapeDuration(Duration duration) {
