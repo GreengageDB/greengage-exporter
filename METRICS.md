@@ -1190,6 +1190,18 @@ greengage_gpbackup_seconds_since_last_backup_completion{database="mydb",incremen
 
 ## Exporter Internal Metrics
 
+### greengage_exporter_uptime_seconds
+
+**Type:** Gauge  
+**Description:** Duration in seconds since the exporter started. Useful for tracking exporter restarts and availability.  
+**Unit:** seconds  
+**Labels:** None
+
+**Example:**
+```
+greengage_exporter_uptime_seconds 86400.0
+```
+
 ### greengage_exporter_total_scraped_total
 
 **Type:** Counter  
@@ -1211,7 +1223,7 @@ rate(greengage_exporter_total_scraped_total[5m])
 ### greengage_exporter_total_error_total
 
 **Type:** Counter  
-**Description:** Total number of scrape errors encountered by the exporter.  
+**Description:** Total number of scrape errors encountered by the exporter (connection failures, version detection errors, etc.).  
 **Labels:** None
 
 **Example:**
@@ -1222,6 +1234,32 @@ greengage_exporter_total_error_total 0.0
 **Alerting:** Alert when error rate is high:
 ```promql
 rate(greengage_exporter_total_error_total[5m]) > 0.1
+```
+
+---
+
+### greengage_exporter_collector_error_total
+
+**Type:** Counter  
+**Description:** Number of errors per collector. Helps identify which specific collector is causing issues during scrapes.  
+**Labels:**
+- `collector` - Name of the collector that failed (e.g., `segment`, `locks`, `database_size`, `replication_monitor`)
+
+**Example:**
+```
+greengage_exporter_collector_error_total{collector="segment"} 0.0
+greengage_exporter_collector_error_total{collector="locks"} 2.0
+greengage_exporter_collector_error_total{collector="replication_monitor"} 0.0
+```
+
+**Usage:** Identify problematic collectors:
+```promql
+topk(5, greengage_exporter_collector_error_total)
+```
+
+**Alerting:** Alert when a specific collector is failing repeatedly:
+```promql
+increase(greengage_exporter_collector_error_total[1h]) > 5
 ```
 
 ---
@@ -1266,6 +1304,5 @@ greengage_exporter_scrape_duration_seconds_max > 15
 
 ---
 
-**Generated for:** Greengage DB Exporter v1.0.0  
-**Last Updated:** 2024-12-01
+**Generated for:** Greengage DB Exporter v1.0.0
 
