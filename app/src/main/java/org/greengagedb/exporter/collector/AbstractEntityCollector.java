@@ -87,7 +87,7 @@ public abstract class AbstractEntityCollector<K, V> implements Collector {
     }
 
     @Override
-    public final void collect(Connection connection, GreengageVersion version) throws SQLException {
+    public void collect(Connection connection, GreengageVersion version) throws SQLException {
         Objects.requireNonNull(connection, "Connection must not be null");
         Objects.requireNonNull(version, "Version must not be null");
 

@@ -90,8 +90,8 @@ class CollectorOrchestratorTest {
         lenient().when(orchestratorConfig.scrapeCacheMaxAge()).thenReturn(Duration.ofSeconds(30));
         lenient().when(orchestratorConfig.connectionRetryAttempts()).thenReturn(3);
         lenient().when(orchestratorConfig.connectionRetryDelay()).thenReturn(Duration.ofSeconds(1));
-        lenient().when(orchestratorConfig.collectorFailureThreshold()).thenReturn(3);
-        lenient().when(orchestratorConfig.circuitBreakerEnabled()).thenReturn(true);
+        lenient().when(orchestratorConfig.scrapeFailureThreshold()).thenReturn(3);
+        lenient().when(orchestratorConfig.scrapeFailFastEnabled()).thenReturn(true);
 
         // Setup collectors config
         lenient().when(collectorsConfig.perDB()).thenReturn(perDBConfig);
@@ -275,7 +275,7 @@ class CollectorOrchestratorTest {
     }
 
     @Test
-    void testScrape_CircuitBreakerTriggered() throws Exception {
+    void testScrape_FailFastTriggered() throws Exception {
         // Setup - create 4 collectors (more than threshold of 3)
         Collector collector3 = mock(Collector.class);
         Collector collector4 = mock(Collector.class);
@@ -311,18 +311,18 @@ class CollectorOrchestratorTest {
         // Execute
         orchestrator.scrape();
 
-        // Verify - circuit breaker triggered, 4th collector not executed
+        // Verify - fail-fast triggered, 4th collector not executed
         verify(generalCollector1).collect(any(), any());
         verify(generalCollector2).collect(any(), any());
         verify(collector3).collect(any(), any());
-        verify(collector4, never()).collect(any(), any()); // Circuit breaker stopped execution
+        verify(collector4, never()).collect(any(), any()); // Fail-fast stopped execution
         verify(exporterMetrics, atLeast(3)).incrementTotalError();
     }
 
     @Test
-    void testScrape_CircuitBreakerDisabled_AllCollectorsExecute() throws Exception {
+    void testScrape_FailFastDisabled_AllCollectorsExecute() throws Exception {
         // Setup
-        when(orchestratorConfig.circuitBreakerEnabled()).thenReturn(false); // Disable circuit breaker
+        when(orchestratorConfig.scrapeFailFastEnabled()).thenReturn(false); // Disable fail-fast
 
         Collector collector3 = mock(Collector.class);
         Collector collector4 = mock(Collector.class);
@@ -401,7 +401,7 @@ class CollectorOrchestratorTest {
     }
 
     @Test
-    void testScrape_PerDatabaseCollectors_CleanupOnCircuitBreaker() throws Exception {
+    void testScrape_PerDatabaseCollectors_CleanupOnFailFast() throws Exception {
         // Setup
         when(perDBConfig.mode()).thenReturn(PerDBMode.ALL);
 
