@@ -75,12 +75,39 @@ class GreengageVersionTest {
     }
 
     @Test
-    void testIsSupported_Version6() {
-        String versionString = "PostgreSQL 9.4.26 (Greengage Database 6.0.0 build 1) on x86_64-unknown-linux-gnu";
+    void testIsSupported_MinimumVersion() {
+        String versionString = "PostgreSQL 9.4.26 (Greengage Database 6.27.1 build 1) on x86_64-unknown-linux-gnu";
         GreengageVersion version = GreengageVersion.parse(versionString);
 
         assertNotNull(version);
-        assertTrue(version.isSupported(), "Version 6.0.0 should be supported (minimum)");
+        assertTrue(version.isSupported(), "Version 6.27.1 should be supported (minimum)");
+    }
+
+    @Test
+    void testIsSupported_BelowMinimumMinor_NotSupported() {
+        String versionString = "PostgreSQL 9.4.26 (Greengage Database 6.26.99 build 1) on x86_64-unknown-linux-gnu";
+        GreengageVersion version = GreengageVersion.parse(versionString);
+
+        assertNotNull(version);
+        assertFalse(version.isSupported(), "Version 6.26.x should not be supported");
+    }
+
+    @Test
+    void testIsSupported_BelowMinimumPatch_NotSupported() {
+        String versionString = "PostgreSQL 9.4.26 (Greengage Database 6.27.0 build 1) on x86_64-unknown-linux-gnu";
+        GreengageVersion version = GreengageVersion.parse(versionString);
+
+        assertNotNull(version);
+        assertFalse(version.isSupported(), "Version 6.27.0 should not be supported");
+    }
+
+    @Test
+    void testIsSupported_AboveMinimum() {
+        String versionString = "PostgreSQL 9.4.26 (Greengage Database 6.28.0 build 1) on x86_64-unknown-linux-gnu";
+        GreengageVersion version = GreengageVersion.parse(versionString);
+
+        assertNotNull(version);
+        assertTrue(version.isSupported(), "Version 6.28.0 should be supported");
     }
 
     @Test
@@ -135,6 +162,11 @@ class GreengageVersionTest {
 
         assertNotNull(version);
         assertEquals("7.3.15", version.fullVersion());
+    }
+
+    @Test
+    void testMinimumVersion() {
+        assertEquals("6.27.1", GreengageVersion.minimumVersion());
     }
 
     @Test

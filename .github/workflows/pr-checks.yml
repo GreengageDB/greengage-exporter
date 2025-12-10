@@ -14,13 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check file sizes
-        run: |
-          # Check for large files (> 5MB)
-          find . -type f -size +5M -not -path "*/target/*" -not -path "*/.git/*" | while read file; do
-            echo "Warning: Large file detected: $file"
-          done
-
       - name: Validate Maven POM
         run: |
           cd app
@@ -106,6 +99,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Configuration files modified:" >> $GITHUB_STEP_SUMMARY
           git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(properties|yml|yaml|xml)$' >> $GITHUB_STEP_SUMMARY || echo "No config files changed" >> $GITHUB_STEP_SUMMARY
+
+
 
 
 

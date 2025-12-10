@@ -46,7 +46,7 @@ import java.util.function.Supplier;
 @ApplicationScoped
 public class SpillHostCollector extends AbstractEntityCollector<String, HostValueStats> {
     private static final String SQL = """
-            WITH per_segment AS (SELECT w.segid     AS content, -- подставь реальный сегмент id
+            WITH per_segment AS (SELECT w.segid  AS content,
                                         SUM(w.size) AS spill_bytes
                                  FROM gp_toolkit.gp_workfile_usage_per_query w
                                  GROUP BY w.segid),

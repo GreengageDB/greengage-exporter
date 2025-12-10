@@ -165,7 +165,7 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
                     .description("Mem usage per host and resource group")
                     .tag("resourceGroupName", hostValues.resourceGroupName())
                     .tag("hostname", hostValues.hostname())
-                    .tag("limit", hostValues.memoryLimit() > 0 ? String.valueOf(hostValues.memoryLimit()) : "∞")
+                    .tag("limit", hostValues.memoryLimit() > 0 ? String.valueOf(hostValues.memoryLimit()) : "unlimited")
                     .register(registry).getId());
             meterIds.add(Gauge.builder(MetricNameBuilder.build(Constants.SUBSYSTEM_HOST, "cpu_usage_percentage"),
                             () -> {
@@ -178,7 +178,7 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
                             })
                     .description("CPU usage percentage per host and resource group")
                     .tag("resourceGroupName", hostValues.resourceGroupName())
-                    .tag("limit", hostValues.cpuRateLimit() > 0 ? String.valueOf(hostValues.cpuRateLimit()) : "∞")
+                    .tag("limit", hostValues.cpuRateLimit() > 0 ? String.valueOf(hostValues.cpuRateLimit()) : "unlimited")
                     .tag("hostname", hostValues.hostname())
                     .register(registry).getId());
         } else if (key.groupBy() == RsgKey.GroupType.RESOURCE_GROUP) {
