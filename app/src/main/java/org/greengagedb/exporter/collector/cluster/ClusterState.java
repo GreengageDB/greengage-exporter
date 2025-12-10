@@ -23,7 +23,7 @@ public record ClusterState(
         String version,
         String master,
         String standby,
-        double uptime,
+        long uptime,
         double sync,
         double configLoadTime,
         int maxConnections

@@ -100,8 +100,8 @@ public class ExporterApp {
                         version.minor(),
                         version.patch());
                 if (!version.isSupported()) {
-                    log.warn("Detected Greengage version {} is not supported. Minimum supported version is 6.0.0",
-                            version.fullVersion());
+                    log.warn("Detected Greengage version {} is not supported. Minimum supported version is {}",
+                            version.fullVersion(), GreengageVersion.minimumVersion());
                     log.error("Shutting down Greengage Exporter due to unsupported database version");
                     System.exit(1);
                 }

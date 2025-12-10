@@ -22,7 +22,10 @@ import java.util.regex.Pattern;
  * Represents a Greengage database version
  */
 public record GreengageVersion(int major, int minor, int patch, String rawVersion) {
-    private static final int MINIMUM_SUPPORTED_VERSION = 6;
+    // Minimum available Greengage version is 6.27.1
+    private static final int MIN_MAJOR = 6;
+    private static final int MIN_MINOR = 27;
+    private static final int MIN_PATCH = 1;
     private static final Pattern GG_VERSION_REGEX = Pattern.compile(
             "\\([^)]*?\\b((\\d+)\\.(\\d+)\\.(\\d+)(?:[_-|+][A-Za-z0-9.]+)?)\\b\\s+build\\b"
     );
@@ -61,7 +64,17 @@ public record GreengageVersion(int major, int minor, int patch, String rawVersio
     }
 
     public boolean isSupported() {
-        return major >= MINIMUM_SUPPORTED_VERSION;
+        if (major != MIN_MAJOR) {
+            return major > MIN_MAJOR;
+        }
+        if (minor != MIN_MINOR) {
+            return minor > MIN_MINOR;
+        }
+        return patch >= MIN_PATCH;
+    }
+
+    public static String minimumVersion() {
+        return MIN_MAJOR + "." + MIN_MINOR + "." + MIN_PATCH;
     }
 }
 

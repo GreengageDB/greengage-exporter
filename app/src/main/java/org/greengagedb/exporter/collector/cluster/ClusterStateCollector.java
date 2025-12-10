@@ -98,7 +98,7 @@ public class ClusterStateCollector extends AbstractAggregateCollector<ClusterSta
                 .version("unknown")
                 .master("unknown")
                 .standby("")
-                .uptime(0.0)
+                .uptime(0)
                 .sync(0.0)
                 .configLoadTime(0.0)
                 .build();
@@ -123,7 +123,7 @@ public class ClusterStateCollector extends AbstractAggregateCollector<ClusterSta
                 .version(version.fullVersion())
                 .master("unknown")
                 .standby("")
-                .uptime(0.0)
+                .uptime(0)
                 .sync(0.0)
                 .configLoadTime(0.0);
 
@@ -147,7 +147,7 @@ public class ClusterStateCollector extends AbstractAggregateCollector<ClusterSta
                 stateBuilder
                         .master(master != null ? master : "unknown")
                         .standby(standby != null ? standby : "")
-                        .uptime(rs.getDouble("uptime_seconds"))
+                        .uptime(rs.getLong("uptime_seconds"))
                         .sync(rs.getDouble("sync_replicas"))
                         .maxConnections(rs.getInt("max_connections"));
 

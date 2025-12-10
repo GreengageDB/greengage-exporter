@@ -328,8 +328,8 @@ class DatabaseServiceTest {
 
     @Test
     void testDetectVersion_MinimumSupportedVersion() throws Exception {
-        // Setup - test version 6.0.0 (minimum supported)
-        String versionString = "PostgreSQL 16.0 (Greengage 6.0.0 build 1) on x86_64-pc-linux-gnu";
+        // Setup - test version 6.27.1 (minimum supported)
+        String versionString = "PostgreSQL 16.0 (Greengage 6.27.1 build 1) on x86_64-pc-linux-gnu";
         when(dataSource.getConnection()).thenReturn(mockConnection);
         when(mockConnection.createStatement()).thenReturn(mockStatement);
         when(mockStatement.executeQuery("SELECT version()")).thenReturn(mockResultSet);
@@ -341,7 +341,7 @@ class DatabaseServiceTest {
 
         // Verify
         assertNotNull(version);
-        assertTrue(version.isSupported(), "Version 6.0.0 should be supported");
+        assertTrue(version.isSupported(), "Version 6.27.1 should be supported");
         assertEquals(6, version.major());
     }
 

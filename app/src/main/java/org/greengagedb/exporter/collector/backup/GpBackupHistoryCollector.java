@@ -45,23 +45,23 @@ public class GpBackupHistoryCollector extends AbstractEntityCollector<GpBackupHi
     private static final String FAILURE_STATUS = "failure";
     private static final Set<String> COMPLETED_STATUSES = Set.of(SUCCESS_STATUS, FAILURE_STATUS);
     private static final String STATS_SQL = """
-            WITH last_backups AS (SELECT database_name,
-                                         incremental,
-                                         status,
-                                         MAX(timestamp) AS start_ts,
-                                         MAX(end_time)  AS end_ts
-                                  FROM backups
-                                  GROUP BY database_name, incremental, status),
-                 counters AS (SELECT database_name,
-                                     incremental,
-                                     status,
-                                     count(*) AS count
-                              FROM backups
-                              GROUP BY database_name, incremental, status)
-            SELECT lb.database_name,
-                   lb.incremental,
-                   lower(lb.status)                AS status,
-                   c.count,
+            WITH ranked AS (SELECT database_name,
+                                   incremental,
+                                   status,
+                                   timestamp AS start_ts,
+                                   end_time  AS end_ts,
+                                   ROW_NUMBER() OVER (
+                                       PARTITION BY database_name, incremental, status
+                                       ORDER BY timestamp DESC
+                                       )     AS rn,
+                                   COUNT(*) OVER (
+                                       PARTITION BY database_name, incremental, status
+                                       )     AS cnt
+                            FROM backups)
+            SELECT database_name,
+                   incremental,
+                   lower(status) AS status,
+                   cnt           AS count,
                    strftime(
                            '%s',
                            substr(end_ts, 1, 4) || '-' ||
@@ -70,9 +70,7 @@ public class GpBackupHistoryCollector extends AbstractEntityCollector<GpBackupHi
                            substr(end_ts, 9, 2) || ':' ||
                            substr(end_ts, 11, 2) || ':' ||
                            substr(end_ts, 13, 2)
-                   )
-                       -
-                   strftime(
+                   ) - strftime(
                            '%s',
                            substr(start_ts, 1, 4) || '-' ||
                            substr(start_ts, 5, 2) || '-' ||
@@ -80,20 +78,21 @@ public class GpBackupHistoryCollector extends AbstractEntityCollector<GpBackupHi
                            substr(start_ts, 9, 2) || ':' ||
                            substr(start_ts, 11, 2) || ':' ||
                            substr(start_ts, 13, 2)
-                   )                               AS duration_seconds,
-                   (strftime(
-                            '%s', datetime()) - strftime(
-                            '%s',
-                            substr(end_ts, 1, 4) || '-' ||
-                            substr(end_ts, 5, 2) || '-' ||
-                            substr(end_ts, 7, 2) || ' ' ||
-                            substr(end_ts, 9, 2) || ':' ||
-                            substr(end_ts, 11, 2) || ':' ||
-                            substr(end_ts, 13, 2)
-                                                )) AS seconds_since_completion
-            FROM last_backups lb
-                     JOIN counters c
-                          ON lb.database_name = c.database_name AND lb.incremental = c.incremental AND lb.status = c.status""";
+                       )         AS duration_seconds,
+                   (
+                       strftime('%s', datetime()) -
+                       strftime(
+                               '%s',
+                               substr(end_ts, 1, 4) || '-' ||
+                               substr(end_ts, 5, 2) || '-' ||
+                               substr(end_ts, 7, 2) || ' ' ||
+                               substr(end_ts, 9, 2) || ':' ||
+                               substr(end_ts, 11, 2) || ':' ||
+                               substr(end_ts, 13, 2)
+                       )
+                       )         AS seconds_since_completion
+            FROM ranked
+            WHERE rn = 1""";
     @Inject
     @DataSource("gpbackup_history")
     AgroalDataSource dataSource;
