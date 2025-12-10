@@ -90,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: greengage-exporter-jar
-          path: app/target/*.jar
+          path: app/target/quarkus-app/
           retention-days: 7
 
   code-quality:
@@ -188,6 +188,12 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: greengage-exporter-jar
+          path: app/target/quarkus-app/
 
       - name: Build Docker image (JVM)
         run: |
