@@ -27,7 +27,7 @@ public record GreengageVersion(int major, int minor, int patch, String rawVersio
     private static final int MIN_MINOR = 27;
     private static final int MIN_PATCH = 1;
     private static final Pattern GG_VERSION_REGEX = Pattern.compile(
-            "\\([^)]*?\\b((\\d+)\\.(\\d+)\\.(\\d+)(?:[_-|+][A-Za-z0-9.]+)?)\\b\\s+build\\b"
+            "\\([^)]*?\\b((\\d+)\\.(\\d+)\\.(\\d+)(?:[+_-][A-Za-z0-9.]+)*)\\b\\s+build\\b"
     );
 
     private static final int MAJOR_GROUP = 2;
@@ -77,4 +77,3 @@ public record GreengageVersion(int major, int minor, int patch, String rawVersio
         return MIN_MAJOR + "." + MIN_MINOR + "." + MIN_PATCH;
     }
 }
-
