@@ -73,6 +73,14 @@ class GreengageVersionTest {
         GreengageVersion version = GreengageVersion.parse("");
         assertNull(version);
     }
+    @Test
+    void testParseGpVersion() {
+        GreengageVersion version = GreengageVersion.parse("PostgreSQL 9.4.26 (Greenplum Database 6.27.1_arenadata64+dev.21.g6cee73938 build commit:6cee7393826834ed5d908f48cc87cc52519fb8c3) on x86_64-unknown-linux-gnu, compiled by gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, 64-bit compiled on Jul 16 2025 12:42:41 (with assert checking)");
+        assertNotNull(version);
+        assertEquals(6, version.major());
+        assertEquals(27, version.minor());
+        assertEquals(1, version.patch());
+    }
 
     @Test
     void testIsSupported_MinimumVersion() {
