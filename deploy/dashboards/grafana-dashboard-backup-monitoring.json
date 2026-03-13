@@ -828,7 +828,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_gpbackup_last_backup_duration_seconds{cluster=~\"$cluster\",database=~\"$database\",incremental=\"1\",status=\"success\"} / greengage_gpbackup_last_backup_duration_seconds{cluster=~\"$cluster\",database=~\"$database\",incremental=\"0\",status=\"success\"}",
+          "expr": "greengage_gpbackup_last_backup_duration_seconds{cluster=~\"$cluster\",database=~\"$database\",incremental=\"1\",status=\"success\"} / ignoring(incremental) greengage_gpbackup_last_backup_duration_seconds{cluster=~\"$cluster\",database=~\"$database\",incremental=\"0\",status=\"success\"}",
           "refId": "A"
         }
       ],
