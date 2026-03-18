@@ -301,7 +301,7 @@ keytool -importcert -alias greengage-ca -file ca.crt -keystore $JAVA_HOME/lib/se
 # Run exporter with truststore
 java -Djavax.net.ssl.trustStore=/path/to/truststore.jks \
      -Djavax.net.ssl.trustStorePassword=trustpass \
-     -jar greengage-exporter-1.0.0.jar
+     -jar greengage-exporter-1.1.0.jar
 ```
 
 ### Complete SSL Configuration Example
