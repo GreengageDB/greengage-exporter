@@ -456,7 +456,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "(avg by (hostname, resourceGroupName) (greengage_host_mem_usage_mb{cluster=~\"$cluster\",resourceGroupName=~\"$resource_group\"})/ on (resourceGroupName) group_left greengage_host_mem_limit_mb{cluster=~\"$cluster\",resourceGroupName=~\"$resource_group\"}) * 100 > 0",
+          "expr": "(avg by (hostname, resourceGroupName) (greengage_host_mem_usage_mb{cluster=~\"$cluster\",resourceGroupName=~\"$resource_group\"})/ on (resourceGroupName) group_left() (label_replace(node_memory_MemTotal_bytes, \"host\", \"$1\", \"instance\", \"([^.:]+)[.:].*\" ) * on(host) group_right() (label_replace(greengage_host_mem_limit_percent_value{cluster=~\"$cluster\",resourceGroupName=~\"$resource_group\"}, \"host\", \"$1\", \"instance\", \"([^.:]+)[.:].*\")  / 100)/ 1024 / 1024)) * 100 > 0",
           "legendFormat": "{{hostname}} - {{resourceGroupName}} - Usage/Limit",
           "refId": "A"
         }
@@ -749,7 +749,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "expr": "greengage_host_mem_usage_mb{cluster=~\"$cluster\",hostname=~\"$hostname\",resourceGroupName=~\"$resource_group\"}",
-          "legendFormat": "{{hostname}} - {{resourceGroupName}} (limit: {{limit}} MB)",
+          "legendFormat": "{{hostname}} - {{resourceGroupName}} ",
           "refId": "A"
         }
       ],

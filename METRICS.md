@@ -646,29 +646,28 @@ greengage_host_cpu_usage_skew_ratio 1.2
 **Labels:**
 - `hostname` - Hostname
 - `resourceGroupName` - Resource group name
-- `limit` - Memory limit for the resource group (`∞` for unlimited, or numeric value)
 
 **Example:**
 ```
-greengage_host_mem_usage_mb{hostname="host-1.internal",limit="∞",resourceGroupName="default_group"} 4217.0
-greengage_host_mem_usage_mb{hostname="host-1.internal",limit="∞",resourceGroupName="admin_group"} 161.0
+greengage_host_mem_usage_mb{hostname="host-1.internal",resourceGroupName="default_group"} 4217.0
+greengage_host_mem_usage_mb{hostname="host-1.internal",resourceGroupName="admin_group"} 161.0
 ```
 
 ---
 
-### greengage_host_mem_limit_mb
+### greengage_host_mem_limit_percent
 
 **Type:** Gauge  
-**Description:** Memory limit in megabytes per resource group.  
-**Unit:** megabytes  
-**Possible Values:** `-1` for unlimited, or positive value for limit  
+**Description:** Memory limit in percents per resource group.  
+**Unit:** percent  
+**Possible Values:** positive value for limit  
 **Labels:**
 - `resourceGroupName` - Resource group name
 
 **Example:**
 ```
-greengage_host_mem_limit_mb{resourceGroupName="default_group"} -1.0
-greengage_host_mem_limit_mb{resourceGroupName="custom_group"} 8192.0
+greengage_host_mem_limit_percent{resourceGroupName="default_group"} 100
+greengage_host_mem_limit_percent{resourceGroupName="custom_group"} 8192.0
 ```
 
 ---

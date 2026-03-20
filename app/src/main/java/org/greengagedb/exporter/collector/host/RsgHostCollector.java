@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -88,6 +89,7 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
             ORDER BY r.rsgname, h.hostname""";
     private final AtomicReference<SkewStats> cpuStats = new AtomicReference<>(new SkewStats(0.0, 0, 0));
     private final AtomicReference<SkewStats> memStats = new AtomicReference<>(new SkewStats(0.0, 0, 0));
+    private final AtomicInteger fullMemoryLimit = new AtomicInteger();
 
     @Override
     public String getName() {
@@ -106,7 +108,7 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
         Map<RsgKey, RsgHostStats.RsgValues> rsgValuesMap = new HashMap<>();
         var sql = version.isAtLeastVersion7() ? SQL_V7 : SQL_V6;
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+            ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 var stats = new RsgHostValues(
                         rs.getString("rsgname"),
@@ -135,6 +137,7 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
                             .map(it -> HostValueStats.of(it.hostname(), it.cpuUsage()))
                             .toList()
             ));
+            fullMemoryLimit.set(rsgValuesMap.values().stream().mapToInt(RsgHostStats.RsgValues::memoryLimit).sum());
         }
         Map<RsgKey, RsgHostStats> entitiesMap = new HashMap<>();
         hostValuesMap.forEach((key, value) -> entitiesMap.put(key, new RsgHostStats(value)));
@@ -165,7 +168,6 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
                     .description("Mem usage per host and resource group")
                     .tag("resourceGroupName", hostValues.resourceGroupName())
                     .tag("hostname", hostValues.hostname())
-                    .tag("limit", hostValues.memoryLimit() > 0 ? String.valueOf(hostValues.memoryLimit()) : "unlimited")
                     .register(registry).getId());
             meterIds.add(Gauge.builder(MetricNameBuilder.build(Constants.SUBSYSTEM_HOST, "cpu_usage_percentage"),
                             () -> {
@@ -206,7 +208,7 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
                     .description("Number of queueing sessions per resource group")
                     .tag("resourceGroupName", valueStats.rsgValues().resourceGroupName())
                     .register(registry).getId());
-            meterIds.add(Gauge.builder(MetricNameBuilder.build(Constants.SUBSYSTEM_HOST, "mem_limit_mb"),
+            meterIds.add(Gauge.builder(MetricNameBuilder.build(Constants.SUBSYSTEM_HOST, "mem_limit_percent"),
                             () -> {
                                 var stats = valueSupplier.get();
                                 if (stats != null) {
@@ -216,6 +218,26 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
                                 }
                             })
                     .description("Mem limit per resource group")
+                    .tag("resourceGroupName", valueStats.rsgValues().resourceGroupName())
+                    .register(registry).getId());
+            meterIds.add(Gauge.builder(MetricNameBuilder.build(Constants.SUBSYSTEM_HOST, "mem_limit_percent_value"),
+                            () -> {
+                                var stats = valueSupplier.get();
+                                if (stats == null) {
+                                    return Double.NaN;
+                                }
+                                var v = stats.rsgValues().memoryLimit();
+                                if(v > 0) {
+                                    return v;
+                                }
+                                // if limit value is unlimited let's assume resource group can use all memory left by other groups
+                                if((100 - fullMemoryLimit.get()) > 0) {
+                                    return 100 - fullMemoryLimit.get();
+                                }
+                                // if by some cases there are no free memory let's assign some value to avoid errors during memory usage calculation
+                                return 1;
+                            })
+                    .description("Mem limit per resource group calculation value")
                     .tag("resourceGroupName", valueStats.rsgValues().resourceGroupName())
                     .register(registry).getId());
             meterIds.add(Gauge.builder(MetricNameBuilder.build(Constants.SUBSYSTEM_HOST, "cpu_rate_limit_percentage"),
