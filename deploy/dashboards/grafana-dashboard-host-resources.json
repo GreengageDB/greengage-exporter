@@ -1063,7 +1063,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "expr": "greengage_host_num_queueing_sessions{cluster=~\"$cluster\",resourceGroupName=~\"$resource_group\"}",
-          "legendFormat": "{{resourceGroupName}} - QUEUED",
+          "legendFormat": "{{resourceGroupName}} - QUEUEING",
           "refId": "B"
         }
       ],
