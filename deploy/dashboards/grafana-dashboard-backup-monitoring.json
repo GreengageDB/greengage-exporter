@@ -93,7 +93,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "sum(greengage_gpbackup_backup_count{cluster_name=~\"$cluster_name\",database=~\"$database\",status=\"success\",type=\"full\"})",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -382,7 +385,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_seconds_since_last_backup_completion{cluster_name=~\"$cluster_name\",database=~\"$database\",incremental=\"full\"}",
+          "legendFormat": "{{cluster_name}} - {{database}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -460,7 +466,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_seconds_since_last_backup_completion{cluster_name=~\"$cluster_name\",database=~\"$database\",incremental=\"incremental\"}",
+          "legendFormat": "{{cluster_name}} - {{database}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -595,8 +604,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_seconds_since_last_backup_completion{cluster_name=~\"$cluster_name\",database=~\"$database\",incremental=\"full\"}",
-          "legendFormat": "{{database}} - Full Backup",
+          "legendFormat": "{{cluster_name}} - {{database}} - Full Backup",
+          "range": true,
           "refId": "A"
         },
         {
@@ -604,8 +615,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_seconds_since_last_backup_completion{cluster_name=~\"$cluster_name\",database=~\"$database\",incremental=\"incremental\"}",
-          "legendFormat": "{{database}} - Incremental Backup",
+          "legendFormat": "{{cluster_name}} - {{database}} - Incremental Backup",
+          "range": true,
           "refId": "B"
         }
       ],
@@ -692,7 +705,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_last_backup_duration_seconds{cluster_name=~\"$cluster_name\",database=~\"$database\",incremental=\"0\",status=\"success\"}",
+          "legendFormat": "{{cluster_name}} - {{database}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -766,7 +782,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_last_backup_duration_seconds{cluster_name=~\"$cluster_name\",database=~\"$database\",incremental=\"1\",status=\"success\"}",
+          "legendFormat": "{{cluster_name}} - {{database}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -828,7 +847,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_last_backup_duration_seconds{cluster_name=~\"$cluster_name\",database=~\"$database\",incremental=\"1\",status=\"success\"} / ignoring(incremental) greengage_gpbackup_last_backup_duration_seconds{cluster_name=~\"$cluster_name\",database=~\"$database\",incremental=\"0\",status=\"success\"}",
+          "legendFormat": "{{cluster_name}} - {{database}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -956,8 +978,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_last_backup_duration_seconds{cluster_name=~\"$cluster_name\",database=~\"$database\",incremental=\"0\",status=\"success\"}",
-          "legendFormat": "{{database}} - Full Backup Duration",
+          "legendFormat": "{{cluster_name}} - {{database}} - Full Backup Duration",
+          "range": true,
           "refId": "A"
         },
         {
@@ -965,8 +989,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_last_backup_duration_seconds{cluster_name=~\"$cluster_name\",database=~\"$database\",incremental=\"1\",status=\"success\"}",
-          "legendFormat": "{{database}} - Incremental Backup Duration",
+          "legendFormat": "{{cluster_name}} - {{database}} - Incremental Backup Duration",
+          "range": true,
           "refId": "B"
         }
       ],
@@ -1081,8 +1107,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_gpbackup_backup_count{cluster_name=~\"$cluster_name\",database=~\"$database\",status=\"success\",type=\"full\"}",
-          "legendFormat": "Full Backups",
+          "editorMode": "code",
+          "expr": "sum by (cluster_name) (greengage_gpbackup_backup_count{cluster_name=~\"$cluster_name\",database=~\"$database\",status=\"success\",type=\"full\"})",
+          "legendFormat": "{{cluster_name}} - Full Backups",
+          "range": true,
           "refId": "A"
         },
         {
@@ -1090,8 +1118,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_gpbackup_backup_count{cluster_name=~\"$cluster_name\",database=~\"$database\",status=\"success\",type=\"incremental\"}",
-          "legendFormat": "Incremental Backups",
+          "editorMode": "code",
+          "expr": "sum by (cluster_name) (greengage_gpbackup_backup_count{cluster_name=~\"$cluster_name\",database=~\"$database\",status=\"success\",type=\"incremental\"})",
+          "legendFormat": "{{cluster_name}} - Incremental Backups",
+          "range": true,
           "refId": "B"
         }
       ],
@@ -1217,8 +1247,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_backup_count{cluster_name=~\"$cluster_name\",database=~\"$database\",status=\"success\",type=\"full\"}",
-          "legendFormat": "{{database}} - Full Success",
+          "legendFormat": "{{cluster_name}} - {{database}} - Full Success",
+          "range": true,
           "refId": "A"
         },
         {
@@ -1226,8 +1258,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_backup_count{cluster_name=~\"$cluster_name\",database=~\"$database\",status=\"success\",type=\"incremental\"}",
-          "legendFormat": "{{database}} - Incremental Success",
+          "legendFormat": "{{cluster_name}} - {{database}} - Incremental Success",
+          "range": true,
           "refId": "B"
         },
         {
@@ -1235,8 +1269,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_gpbackup_backup_count{cluster_name=~\"$cluster_name\",database=~\"$database\",status=\"failure\"}",
-          "legendFormat": "{{database}} - {{type}} Failure",
+          "legendFormat": "{{cluster_name}} - {{database}} - {{type}} Failure",
+          "range": true,
           "refId": "C"
         }
       ],

@@ -52,7 +52,19 @@
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }, "expr": "greengage_cluster_segments_total{cluster_name=~\"$cluster_name\"}", "refId": "A" }],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "greengage_cluster_segments_total{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
       "title": "Total Segments",
       "type": "stat"
     },
@@ -78,7 +90,19 @@
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }, "expr": "greengage_cluster_segments_up{cluster_name=~\"$cluster_name\"}", "refId": "A" }],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "greengage_cluster_segments_up{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
       "title": "Segments UP",
       "type": "stat"
     },
@@ -98,13 +122,25 @@
       "options": {
         "colorMode": "background",
         "graphMode": "area",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }, "expr": "greengage_cluster_segments_down{cluster_name=~\"$cluster_name\"}", "refId": "A" }],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "greengage_cluster_segments_down{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
       "title": "Segments DOWN",
       "type": "stat"
     },
@@ -124,13 +160,25 @@
       "options": {
         "colorMode": "background",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }, "expr": "greengage_cluster_sync{cluster_name=~\"$cluster_name\"}", "refId": "A" }],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "greengage_cluster_sync{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
       "title": "Sync Replicas Active",
       "type": "stat"
     },
@@ -258,7 +306,19 @@
       "id": 310,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
       "pluginVersion": "10.0.0",
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }, "expr": "greengage_cluster_replication_max_lag_bytes{cluster_name=~\"$cluster_name\"}", "refId": "A" }],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "greengage_cluster_replication_max_lag_bytes{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
       "title": "Max Replication Lag",
       "type": "stat"
     },
@@ -277,7 +337,19 @@
       "id": 311,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false }, "textMode": "auto" },
       "pluginVersion": "10.0.0",
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }, "expr": "avg(greengage_cluster_replication_lag_bytes{cluster_name=~\"$cluster_name\"})", "refId": "A" }],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "avg(greengage_cluster_replication_lag_bytes{cluster_name=~\"$cluster_name\"})",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
       "title": "Average Replication Lag",
       "type": "stat"
     },
@@ -296,7 +368,19 @@
       "id": 312,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["min"], "fields": "", "values": false }, "textMode": "auto" },
       "pluginVersion": "10.0.0",
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }, "expr": "min(greengage_cluster_replication_sync_state{cluster_name=~\"$cluster_name\"})", "refId": "A" }],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "min(greengage_cluster_replication_sync_state{cluster_name=~\"$cluster_name\"})",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
       "title": "Minimum Sync State (2=sync, 1=async, 0.5=potential, 0=unknown)",
       "type": "stat"
     },

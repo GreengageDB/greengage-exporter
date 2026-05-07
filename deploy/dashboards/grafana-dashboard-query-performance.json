@@ -95,7 +95,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_query_active_queries_total{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -162,7 +165,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_query_active_queries_slow{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -229,7 +235,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_cluster_query_waiting_count{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -296,7 +305,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_server_locked_sessions_total{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -695,8 +707,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_query_active_queries_duration_bucket{cluster_name=~\"$cluster_name\"}",
-          "legendFormat": "{{bucket}}",
+          "legendFormat": "{{cluster_name}} - {{bucket}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -776,7 +790,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_cluster_connections_all_states_total{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -835,7 +852,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_cluster_connections_total{cluster_name=~\"$cluster_name\",state=\"active\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -894,7 +914,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "greengage_cluster_connections_total{cluster_name=~\"$cluster_name\",state=\"idle\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
