@@ -16,6 +16,7 @@
 package org.greengagedb.exporter.gg;
 
 import io.agroal.api.AgroalDataSource;
+import io.quarkus.scheduler.Scheduled;
 import io.smallrye.faulttolerance.api.CircuitBreakerName;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,7 +24,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.greengagedb.exporter.config.DatasourceConfig;
+import org.greengagedb.exporter.model.ClusterRole;
+import org.greengagedb.exporter.model.DatabaseClusterState;
 import org.greengagedb.exporter.model.GreengageVersion;
+import org.greengagedb.exporter.service.BashExecutorService;
+import org.greengagedb.exporter.service.LiquibaseMigrationService;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -31,7 +37,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static org.greengagedb.exporter.model.ClusterRole.DISPATCHER;
+import static org.greengagedb.exporter.model.ClusterRole.STANDBY;
+import static org.greengagedb.exporter.model.DatabaseClusterState.*;
 
 /**
  * Service for database operations with fault tolerance
@@ -39,12 +50,24 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 @ApplicationScoped
 public class DatabaseService {
+    private static final String DATABASE_CLUSTER_STATE_PROPERTY_NAME = "Database cluster state";
+    private static final String GET_DATABASE_CLUSTER_STATE_COMMAND_TEMPLATE = "%s/pg_controldata %s | grep '%s'";
     private final AgroalDataSource dataSource;
+    private final BashExecutorService bashExecutorService;
+    private final LiquibaseMigrationService migrationService;
+    private final DatasourceConfig datasourceConfig;
     private final AtomicReference<GreengageVersion> cachedVersionRef = new AtomicReference<>();
+    private final AtomicReference<ClusterRole> cachedRoleRef = new AtomicReference<>();
 
     @Inject
-    public DatabaseService(AgroalDataSource dataSource) {
+    public DatabaseService(AgroalDataSource dataSource,
+                           BashExecutorService bashExecutorService,
+                           LiquibaseMigrationService migrationService,
+                           DatasourceConfig datasourceConfig) {
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
+        this.bashExecutorService = Objects.requireNonNull(bashExecutorService, "bashExecutorService");
+        this.migrationService = migrationService;
+        this.datasourceConfig = datasourceConfig;
     }
 
     /**
@@ -126,5 +149,60 @@ public class DatabaseService {
         String versionString = rs.getString(1);
         log.info("Detected Greengage version: {}", versionString);
         return GreengageVersion.parse(versionString);
+    }
+
+    public boolean isDispatcher() {
+        try {
+            ClusterRole role = cachedRoleRef.get();
+            if (role == null) {
+                role = updateClusterRole();
+            }
+            return role == DISPATCHER;
+        } catch (Exception e) {
+            log.warn("Failed to check cluster role: {}", e.getMessage(), e);
+            cachedRoleRef.set(STANDBY);
+            return false;
+        }
+    }
+
+    private ClusterRole updateClusterRole() {
+        ClusterRole previousRole = cachedRoleRef.get();
+        ClusterRole currentRole = getClusterRole();
+        if (previousRole != currentRole) {
+            log.info("Cluster role changed: {} -> {}", previousRole, currentRole);
+        }
+        cachedRoleRef.set(currentRole);
+        if (currentRole == DISPATCHER) {
+            boolean forceMigration = previousRole == null || previousRole != currentRole;
+            migrationService.migrate(forceMigration);
+        }
+        return currentRole;
+    }
+
+    private ClusterRole getClusterRole() {
+        String clusterStateValue = bashExecutorService.run(GET_DATABASE_CLUSTER_STATE_COMMAND_TEMPLATE
+                        .formatted(datasourceConfig.binPath(), datasourceConfig.masterDataDirectory(), DATABASE_CLUSTER_STATE_PROPERTY_NAME))
+                .replace(DATABASE_CLUSTER_STATE_PROPERTY_NAME + ":", "")
+                .trim();
+        Optional<DatabaseClusterState> optionalClusterState = DatabaseClusterState.getByValue(clusterStateValue);
+        if (optionalClusterState.isEmpty()) {
+            return STANDBY;
+        }
+        DatabaseClusterState dbClusterState = optionalClusterState.get();
+        if (MASTER_STATES.contains(dbClusterState)) {
+            return DISPATCHER;
+        }
+        return STANDBY;
+    }
+
+    @Scheduled(every = "${app.datasource.update-role-interval}",
+            concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    void scheduleUpdateCoordinatorRole() {
+        log.debug("Update cluster role");
+        try {
+            updateClusterRole();
+        } catch (Exception e) {
+            log.error("Failed to update cluster role: {}", e.getMessage(), e);
+        }
     }
 }

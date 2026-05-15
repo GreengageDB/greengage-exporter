@@ -62,7 +62,9 @@ public class ExporterApp {
         logConfiguration();
 
         // Try to detect version on startup (non-blocking, will retry on first scrape if fails)
-        detectAndLogVersion();
+        if (databaseService.isDispatcher()) {
+            detectAndLogVersion();
+        }
 
         banner.printFooter();
     }
@@ -133,6 +135,10 @@ public class ExporterApp {
             concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     void schedulePeriodicScrape() {
         log.debug("Periodic scrape triggered");
+        if (!databaseService.isDispatcher()) {
+            log.debug("This is a standby server. Metrics will not be collected");
+            return;
+        }
         try {
             orchestrator.scrape();
         } catch (Exception e) {

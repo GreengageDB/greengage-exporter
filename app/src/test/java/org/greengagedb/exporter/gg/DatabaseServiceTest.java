@@ -18,7 +18,10 @@ package org.greengagedb.exporter.gg;
 import io.agroal.api.AgroalDataSource;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration;
 import io.agroal.api.configuration.AgroalDataSourceConfiguration;
+import org.greengagedb.exporter.config.DatasourceConfig;
 import org.greengagedb.exporter.model.GreengageVersion;
+import org.greengagedb.exporter.service.BashExecutorService;
+import org.greengagedb.exporter.service.LiquibaseMigrationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +45,15 @@ class DatabaseServiceTest {
     private AgroalDataSource dataSource;
 
     @Mock
+    private BashExecutorService bashExecutorService;
+
+    @Mock
+    private LiquibaseMigrationService migrationService;
+
+    @Mock
+    private DatasourceConfig datasourceConfig;
+
+    @Mock
     private AgroalDataSourceConfiguration dataSourceConfig;
 
     @Mock
@@ -58,12 +70,12 @@ class DatabaseServiceTest {
 
     @BeforeEach
     void setUp() {
-        databaseService = new DatabaseService(dataSource);
+        databaseService = new DatabaseService(dataSource, bashExecutorService, migrationService, datasourceConfig);
     }
 
     @Test
     void testConstructor_NullDataSource_ThrowsException() {
-        assertThrows(NullPointerException.class, () -> new DatabaseService(null));
+        assertThrows(NullPointerException.class, () -> new DatabaseService(null, null, null, null));
     }
 
     @Test
