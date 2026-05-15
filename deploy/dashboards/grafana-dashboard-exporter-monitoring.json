@@ -88,7 +88,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "greengage_exporter_uptime_seconds{cluster_name=~\"$cluster_name\"}",
+          "expr": "greengage_exporter_uptime_seconds{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}",
           "legendFormat": "{{cluster_name}}",
           "range": true,
           "refId": "A"
@@ -150,7 +150,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "greengage_exporter_total_scraped_total{cluster_name=~\"$cluster_name\"}",
+          "expr": "greengage_exporter_total_scraped_total{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}",
           "legendFormat": "{{cluster_name}}",
           "range": true,
           "refId": "A"
@@ -216,7 +216,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "greengage_exporter_total_error_total{cluster_name=~\"$cluster_name\"}",
+          "expr": "greengage_exporter_total_error_total{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}",
           "legendFormat": "{{cluster_name}}",
           "range": true,
           "refId": "A"
@@ -286,7 +286,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "greengage_exporter_scrape_duration_seconds_max{cluster_name=~\"$cluster_name\"}",
+          "expr": "greengage_exporter_scrape_duration_seconds_max{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}",
           "legendFormat": "{{cluster_name}}",
           "range": true,
           "refId": "A"
@@ -356,7 +356,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(greengage_exporter_scrape_duration_seconds_sum{cluster_name=~\"$cluster_name\"}[5m]) / rate(greengage_exporter_scrape_duration_seconds_count{cluster_name=~\"$cluster_name\"}[5m])",
+          "expr": "rate(greengage_exporter_scrape_duration_seconds_sum{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m]) / rate(greengage_exporter_scrape_duration_seconds_count{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m])",
           "legendFormat": "{{cluster_name}}",
           "range": true,
           "refId": "A"
@@ -453,7 +453,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_exporter_scrape_duration_seconds_max{cluster_name=~\"$cluster_name\"}",
+          "expr": "greengage_exporter_scrape_duration_seconds_max{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}",
           "legendFormat": "{{cluster_name}} - Max Duration",
           "refId": "A"
         },
@@ -462,7 +462,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(greengage_exporter_scrape_duration_seconds_sum{cluster_name=~\"$cluster_name\"}[5m]) / rate(greengage_exporter_scrape_duration_seconds_count{cluster_name=~\"$cluster_name\"}[5m])",
+          "expr": "rate(greengage_exporter_scrape_duration_seconds_sum{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m]) / rate(greengage_exporter_scrape_duration_seconds_count{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m])",
           "legendFormat": "{{cluster_name}} - Average Duration",
           "refId": "B"
         }
@@ -569,7 +569,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(greengage_exporter_total_scraped_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "expr": "rate(greengage_exporter_total_scraped_total{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m])",
           "legendFormat": "{{cluster_name}} - Scrape Rate",
           "refId": "A"
         },
@@ -578,7 +578,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(greengage_exporter_total_error_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "expr": "rate(greengage_exporter_total_error_total{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m])",
           "legendFormat": "{{cluster_name}} - Error Rate",
           "refId": "B"
         }
@@ -681,7 +681,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "greengage_exporter_collector_duration_seconds{cluster_name=~\"$cluster_name\"}",
+          "expr": "greengage_exporter_collector_duration_seconds{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}",
           "legendFormat": "{{cluster_name}} - {{collector}}",
           "range": true,
           "refId": "A"
@@ -789,7 +789,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "ft_circuitbreaker_state_current{state=\"closed\",cluster_name=~\"$cluster_name\"}",
+          "expr": "ft_circuitbreaker_state_current{state=\"closed\",cluster_name=~\"$cluster_name\",instance=~\"$instance\"}",
           "legendFormat": "{{cluster_name}} - {{method}} - Closed",
           "range": true,
           "refId": "A"
@@ -800,7 +800,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "ft_circuitbreaker_state_current{state=\"open\",cluster_name=~\"$cluster_name\"}",
+          "expr": "ft_circuitbreaker_state_current{state=\"open\",cluster_name=~\"$cluster_name\",instance=~\"$instance\"}",
           "legendFormat": "{{cluster_name}} - {{method}} - Open",
           "range": true,
           "refId": "B"
@@ -811,7 +811,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "ft_circuitbreaker_state_current{state=\"halfOpen\",cluster_name=~\"$cluster_name\"}",
+          "expr": "ft_circuitbreaker_state_current{state=\"halfOpen\",cluster_name=~\"$cluster_name\",instance=~\"$instance\"}",
           "legendFormat": "{{cluster_name}} - {{method}} - Half Open",
           "range": true,
           "refId": "C"
@@ -920,7 +920,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "increase(ft_circuitbreaker_opened_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "expr": "increase(ft_circuitbreaker_opened_total{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m])",
           "legendFormat": "{{cluster_name}} - {{method}} - Opened",
           "range": true,
           "refId": "A"
@@ -1029,7 +1029,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(ft_circuitbreaker_calls_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "expr": "rate(ft_circuitbreaker_calls_total{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m])",
           "legendFormat": "{{cluster_name}} - {{method}} - {{circuitBreakerResult}}",
           "range": true,
           "refId": "A"
@@ -1151,7 +1151,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(ft_timeout_calls_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "expr": "rate(ft_timeout_calls_total{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m])",
           "legendFormat": "{{cluster_name}} - {{method}} - timedOut={{timedOut}}",
           "range": true,
           "refId": "A"
@@ -1245,7 +1245,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(ft_timeout_executionDuration_seconds_sum{cluster_name=~\"$cluster_name\"}[5m]) / rate(ft_timeout_executionDuration_seconds_count{cluster_name=~\"$cluster_name\"}[5m])",
+          "expr": "rate(ft_timeout_executionDuration_seconds_sum{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m]) / rate(ft_timeout_executionDuration_seconds_count{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m])",
           "legendFormat": "{{cluster_name}} - {{method}} - Average Execution Duration",
           "range": true,
           "refId": "A"
@@ -1354,7 +1354,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(ft_retry_calls_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "expr": "rate(ft_retry_calls_total{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m])",
           "legendFormat": "{{cluster_name}} - {{method}} - retried={{retried}}, result={{retryResult}}",
           "range": true,
           "refId": "A"
@@ -1447,7 +1447,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "increase(ft_retry_retries_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "expr": "increase(ft_retry_retries_total{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m])",
           "legendFormat": "{{cluster_name}} - {{method}} - Total Retries",
           "range": true,
           "refId": "A"
@@ -1569,7 +1569,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(ft_invocations_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "expr": "rate(ft_invocations_total{cluster_name=~\"$cluster_name\",instance=~\"$instance\"}[5m])",
           "legendFormat": "{{cluster_name}} - {{method}} - {{result}}",
           "range": true,
           "refId": "A"
@@ -1622,6 +1622,32 @@
         "options": [],
         "query": {
           "query": "label_values(greengage_up, cluster_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(greengage_cluster_state{cluster_name=~\"$cluster_name\"},instance)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Instance",
+        "multi": false,
+        "name": "instance",
+        "options": [],
+        "query": {
+          "query": "label_values(greengage_cluster_state{cluster_name=~\"$cluster_name\"},instance)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
