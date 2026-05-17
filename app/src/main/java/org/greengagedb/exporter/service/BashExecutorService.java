@@ -24,6 +24,8 @@ import java.io.InputStreamReader;
 @Slf4j
 @ApplicationScoped
 public class BashExecutorService {
+    private static String CHECK_COMMAND_ERROR = "Command not found";
+    private static String CHECK_COMMAND_TEMPLATE = "command -v %s > /dev/null 2>&1 || echo '%s'";
 
     public String run(final String command) {
         try {
@@ -49,6 +51,13 @@ public class BashExecutorService {
             return output.toString();
         } catch (Exception e) {
             throw new RuntimeException("Bash command: Exception: " + e.getMessage());
+        }
+    }
+
+    public void checkCommandExists(String command) {
+        String result = run(CHECK_COMMAND_TEMPLATE.formatted(command, CHECK_COMMAND_ERROR));
+        if (result.contains(CHECK_COMMAND_ERROR)) {
+            throw new RuntimeException(CHECK_COMMAND_ERROR + ": " + command);
         }
     }
 }

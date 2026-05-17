@@ -205,7 +205,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg by (cluster_name,resourceGroupName) (greengage_host_cpu_usage_percentage{cluster_name=~\"$cluster_name\",instance=~\"$instance\",resourceGroupName=~\"$resource_group\"}) / on (cluster_name,resourceGroupName) group_left greengage_host_cpu_rate_limit_percentage{cluster_name=~\"$cluster_name\",instance=~\"$instance\",resourceGroupName=~\"$resource_group\"} * 100",
+          "expr": "avg by (cluster_name,resourceGroupName) (greengage_host_cpu_usage_percentage{cluster_name=~\"$cluster_name\",instance=~\"$instance\",resourceGroupName=~\"$resource_group\"}) / on (cluster_name, resourceGroupName) max by (cluster_name, resourceGroupName) (greengage_host_cpu_rate_limit_percentage{cluster_name=~\"$cluster_name\",instance=~\"$instance\",resourceGroupName=~\"$resource_group\"}) * 100",
           "legendFormat": "{{cluster_name}} - {{resourceGroupName}} - % of Limit",
           "range": true,
           "refId": "A"

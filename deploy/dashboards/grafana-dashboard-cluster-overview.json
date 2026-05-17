@@ -57,6 +57,11 @@
                   "color": "green",
                   "index": 1,
                   "text": "UP"
+                },
+                "2": {
+                  "color": "yellow",
+                  "index": 2,
+                  "text": "STANDBY"
                 }
               },
               "type": "value"

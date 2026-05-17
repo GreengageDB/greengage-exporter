@@ -267,4 +267,9 @@ public class ReplicationMonitorCollector extends AbstractEntityCollector<Instanc
                 .description("Maximum replication lag in bytes across all segments")
                 .register(registry);
     }
+
+    @Override
+    protected void resetCollectorState() {
+        maxLagBytes.set(0.0);
+    }
 }

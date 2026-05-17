@@ -137,4 +137,9 @@ public class SpillHostCollector extends AbstractEntityCollector<String, HostValu
                 .description("Mem Spill files skew percentage across all hosts")
                 .register(registry);
     }
+
+    @Override
+    protected void resetCollectorState() {
+        skewStats.set(new SkewStats(0.0, 0, 0));
+    }
 }

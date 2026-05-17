@@ -28,5 +28,8 @@ public interface ScrapeConfig {
 
     @WithDefault("15s")
     Duration interval();
+
+    @WithDefault("true")
+    boolean resetCounters();
 }
 

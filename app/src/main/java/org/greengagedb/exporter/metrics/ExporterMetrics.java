@@ -15,10 +15,7 @@
  */
 package org.greengagedb.exporter.metrics;
 
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -86,7 +83,7 @@ public class ExporterMetrics {
 
     private void registerDatabaseUpGauge() {
         Gauge.builder(NAME_UP, databaseUpGaugeValue::get)
-                .description("Whether greengage cluster is reachable (1=up, 0=down)")
+                .description("Whether greengage cluster is reachable (2=standby, 1=up, 0=down)")
                 .register(registry);
     }
 
@@ -150,5 +147,10 @@ public class ExporterMetrics {
 
     public void setGreengageUp(boolean up) {
         databaseUpGaugeValue.set(up ? 1.0 : 0.0);
+    }
+
+    public void setStandbyClusterState() {
+        log.debug("Set 'standby' cluster state");
+        databaseUpGaugeValue.set(2.0);
     }
 }

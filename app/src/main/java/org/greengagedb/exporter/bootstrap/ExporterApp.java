@@ -26,6 +26,8 @@ import org.greengagedb.exporter.config.ScrapeConfig;
 import org.greengagedb.exporter.gg.DatabaseService;
 import org.greengagedb.exporter.model.GreengageVersion;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Application lifecycle bean that initializes the exporter on startup
  * and schedules periodic metric collection.
@@ -43,6 +45,7 @@ public class ExporterApp {
     private final CollectorOrchestrator orchestrator;
     private final ScrapeConfig scrapeConfig;
     private final Banners banner;
+    private final AtomicBoolean scrapedAsDispatcherPreviously = new AtomicBoolean(false);
 
     @Inject
     public ExporterApp(DatabaseService databaseService,
@@ -137,8 +140,19 @@ public class ExporterApp {
         log.debug("Periodic scrape triggered");
         if (!databaseService.isDispatcher()) {
             log.debug("This is a standby server. Metrics will not be collected");
+            if (scrapedAsDispatcherPreviously.compareAndSet(true, false)) {
+                log.info("The cluster role has been changed to standby");
+                if (scrapeConfig.resetCounters()) {
+                    try {
+                        orchestrator.resetAll();
+                    } catch (Exception e) {
+                        log.error("Failed to reset collectors after cluster role has been changed: {}", e.getMessage(), e);
+                    }
+                }
+            }
             return;
         }
+        scrapedAsDispatcherPreviously.set(true);
         try {
             orchestrator.scrape();
         } catch (Exception e) {

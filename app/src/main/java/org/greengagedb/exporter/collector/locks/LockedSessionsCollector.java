@@ -177,5 +177,10 @@ public class LockedSessionsCollector extends AbstractEntityCollector<String, Loc
         // Lock types are stable (relation, tuple, etc.)
         return false;
     }
+
+    @Override
+    protected void resetCollectorState() {
+        queryWaitingCount.set(0);
+    }
 }
 

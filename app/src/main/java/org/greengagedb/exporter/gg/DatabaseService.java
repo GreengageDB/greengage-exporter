@@ -50,8 +50,9 @@ import static org.greengagedb.exporter.model.DatabaseClusterState.*;
 @Slf4j
 @ApplicationScoped
 public class DatabaseService {
+    private static final String DATABASE_CLUSTER_STATE_UTILITY_PATH_TEMPLATE = "%s/pg_controldata";
     private static final String DATABASE_CLUSTER_STATE_PROPERTY_NAME = "Database cluster state";
-    private static final String GET_DATABASE_CLUSTER_STATE_COMMAND_TEMPLATE = "%s/pg_controldata %s | grep '%s'";
+    private static final String DATABASE_CLUSTER_STATE_COMMAND_TEMPLATE = "%s %s | grep '%s'";
     private final AgroalDataSource dataSource;
     private final BashExecutorService bashExecutorService;
     private final LiquibaseMigrationService migrationService;
@@ -151,6 +152,7 @@ public class DatabaseService {
         return GreengageVersion.parse(versionString);
     }
 
+    @Timeout(value = 60, unit = ChronoUnit.SECONDS)
     public boolean isDispatcher() {
         try {
             ClusterRole role = cachedRoleRef.get();
@@ -159,29 +161,38 @@ public class DatabaseService {
             }
             return role == DISPATCHER;
         } catch (Exception e) {
-            log.warn("Failed to check cluster role: {}", e.getMessage(), e);
-            cachedRoleRef.set(STANDBY);
-            return false;
+            log.error("Failed to check cluster role: {}", e.getMessage(), e);
+            throw e;
         }
     }
 
-    private ClusterRole updateClusterRole() {
+    private synchronized ClusterRole updateClusterRole() {
         ClusterRole previousRole = cachedRoleRef.get();
         ClusterRole currentRole = getClusterRole();
-        if (previousRole != currentRole) {
+        if (previousRole == null) {
+            log.info("Detected initial cluster role: {}", currentRole);
+        } else if (previousRole != currentRole) {
             log.info("Cluster role changed: {} -> {}", previousRole, currentRole);
         }
-        cachedRoleRef.set(currentRole);
         if (currentRole == DISPATCHER) {
-            boolean forceMigration = previousRole == null || previousRole != currentRole;
+            // Force to migrate at first time and if the role has been changed
+            boolean forceMigration = previousRole != currentRole;
             migrationService.migrate(forceMigration);
         }
+        cachedRoleRef.set(currentRole);
         return currentRole;
     }
 
     private ClusterRole getClusterRole() {
-        String clusterStateValue = bashExecutorService.run(GET_DATABASE_CLUSTER_STATE_COMMAND_TEMPLATE
-                        .formatted(datasourceConfig.binPath(), datasourceConfig.masterDataDirectory(), DATABASE_CLUSTER_STATE_PROPERTY_NAME))
+        String command = DATABASE_CLUSTER_STATE_UTILITY_PATH_TEMPLATE.formatted(datasourceConfig.binPath());
+        try {
+            bashExecutorService.checkCommandExists(command);
+        } catch (Exception e) {
+            throw new RuntimeException("Check that the correct value is set for the app.datasource.bin-path property" +
+                    " or the DATASOURCE_BIN_PATH variable. " + e.getMessage(), e);
+        }
+        String clusterStateValue = bashExecutorService.run(DATABASE_CLUSTER_STATE_COMMAND_TEMPLATE
+                        .formatted(command, datasourceConfig.masterDataDirectory(), DATABASE_CLUSTER_STATE_PROPERTY_NAME))
                 .replace(DATABASE_CLUSTER_STATE_PROPERTY_NAME + ":", "")
                 .trim();
         Optional<DatabaseClusterState> optionalClusterState = DatabaseClusterState.getByValue(clusterStateValue);
@@ -203,6 +214,7 @@ public class DatabaseService {
             updateClusterRole();
         } catch (Exception e) {
             log.error("Failed to update cluster role: {}", e.getMessage(), e);
+            // Don't rethrow - we want the scheduler to keep running
         }
     }
 }

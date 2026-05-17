@@ -316,6 +316,26 @@ public class CollectorOrchestrator {
         log.debug("Scrape completed in {} ms", duration.toMillis());
     }
 
+    public void resetAll() {
+        scrapeLock.lock();
+        try {
+            log.info("Resetting all collectors to initial state");
+            for (List<Collector> group : activeCollectorGroup.values()) {
+                for (Collector collector : group) {
+                    try {
+                        collector.reset();
+                    } catch (Exception e) {
+                        log.error("Failed to reset collector {}: {}", collector.getName(), e.getMessage(), e);
+                    }
+                }
+            }
+            exporterMetrics.setStandbyClusterState();
+            lastSuccessfulScrape.set(null);
+        } finally {
+            scrapeLock.unlock();
+        }
+    }
+
     /**
      * Get the number of active collectors.
      *

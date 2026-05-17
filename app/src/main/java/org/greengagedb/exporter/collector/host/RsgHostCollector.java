@@ -303,4 +303,12 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
                 .description("CPU usage skew percentage across all hosts")
                 .register(registry);
     }
+
+    @Override
+    protected void resetCollectorState() {
+        SkewStats emptyStats = new SkewStats(0.0, 0, 0);
+        cpuStats.set(emptyStats);
+        memStats.set(emptyStats);
+        fullMemoryLimit.set(0);
+    }
 }
