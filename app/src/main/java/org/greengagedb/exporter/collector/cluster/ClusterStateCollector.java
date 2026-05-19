@@ -170,6 +170,11 @@ public class ClusterStateCollector extends AbstractAggregateCollector<ClusterSta
     }
 
     @Override
+    protected ClusterState initialState() {
+        return createDefaultState();
+    }
+
+    @Override
     protected void registerMetrics(MeterRegistry registry) {
         // Cluster accessibility gauge with dynamic labels
         // Note: Tags are computed dynamically via Iterable supplier for each scrape

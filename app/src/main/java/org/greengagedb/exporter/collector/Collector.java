@@ -83,5 +83,8 @@ public interface Collector {
     default CollectorGroup getGroup() {
         return CollectorGroup.GENERAL;
     }
+
+    default void reset() {
+    }
 }
 

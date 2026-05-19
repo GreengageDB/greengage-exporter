@@ -135,6 +135,19 @@ public abstract class AbstractAggregateCollector<T> implements Collector {
      */
     protected abstract void updateState(T data);
 
+    protected T initialState() {
+        return null;
+    }
+
+    @Override
+    public void reset() {
+        T initial = initialState();
+        if (initial != null) {
+            log.debug("Resetting state for collector: {}", getName());
+            updateState(initial);
+        }
+    }
+
     /**
      * Register metrics with the meter registry.
      *

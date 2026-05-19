@@ -13,23 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.greengagedb.exporter.config;
+package org.greengagedb.exporter.model;
 
-import io.smallrye.config.ConfigMapping;
-import io.smallrye.config.WithDefault;
-
-import java.time.Duration;
-
-/**
- * Configuration for scraping
- */
-@ConfigMapping(prefix = "app.scrape")
-public interface ScrapeConfig {
-
-    @WithDefault("15s")
-    Duration interval();
-
-    @WithDefault("true")
-    boolean resetCounters();
+public enum ClusterRole {
+    DISPATCHER,
+    STANDBY
 }
-

@@ -113,7 +113,7 @@ public abstract class AbstractEntityCollector<K, V> implements Collector {
                 if (registeredKeys.add(key)) {
                     // First time seeing this key - register metrics
                     List<Meter.Id> meterIds = registerEntityMetrics(registry, key, () -> entities.get(key));
-                    if (shouldRemoveDeletedMetrics() && meterIds != null && !meterIds.isEmpty()) {
+                    if (meterIds != null && !meterIds.isEmpty()) {
                         entityMeterIds.put(key, meterIds);
                     }
                     log.debug("Registered metrics for new entity: {}", key);
@@ -126,6 +126,32 @@ public abstract class AbstractEntityCollector<K, V> implements Collector {
             }
             log.debug("Collector {} failed but continuing due to error handling policy", getName());
         }
+    }
+
+    @Override
+    public void reset() {
+        String collectorName = getName();
+        log.debug("Resetting state for collector: {}", collectorName);
+        entityMeterIds.values().stream()
+                .flatMap(Collection::stream)
+                .forEach(id -> removeMeter(id, collectorName));
+        entityMeterIds.clear();
+        registeredKeys.clear();
+        entities = new ConcurrentHashMap<>();
+
+        resetCollectorState();
+    }
+
+    private void removeMeter(Meter.Id id, String collectorName) {
+        try {
+            registry.remove(id);
+        } catch (Exception e) {
+            log.warn("Failed to remove meter {} during reset of collector {}: {}",
+                    id, collectorName, e.getMessage());
+        }
+    }
+
+    protected void resetCollectorState() {
     }
 
     /**

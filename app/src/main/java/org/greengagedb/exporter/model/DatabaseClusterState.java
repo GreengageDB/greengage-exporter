@@ -13,23 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.greengagedb.exporter.config;
+package org.greengagedb.exporter.model;
 
-import io.smallrye.config.ConfigMapping;
-import io.smallrye.config.WithDefault;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
-/**
- * Configuration for scraping
- */
-@ConfigMapping(prefix = "app.scrape")
-public interface ScrapeConfig {
+@RequiredArgsConstructor
+@Getter
+public enum DatabaseClusterState {
+    SHUTDOWN("shut down"),
+    IN_PRODUCTION("in production");
 
-    @WithDefault("15s")
-    Duration interval();
+    private final String value;
+    public static final Set<DatabaseClusterState> MASTER_STATES = new HashSet<>(Arrays.asList(
+            DatabaseClusterState.SHUTDOWN,
+            DatabaseClusterState.IN_PRODUCTION));
 
-    @WithDefault("true")
-    boolean resetCounters();
+    public static Optional<DatabaseClusterState> getByValue(String value) {
+        return Arrays.stream(DatabaseClusterState.values())
+                .filter(v -> v.getValue().equals(value))
+                .findFirst();
+    }
 }
-

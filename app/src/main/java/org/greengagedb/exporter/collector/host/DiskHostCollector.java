@@ -210,4 +210,13 @@ public class DiskHostCollector extends AbstractEntityCollector<String, DiskValue
     protected boolean shouldFailOnError() {
         return false;
     }
+
+    @Override
+    protected void resetCollectorState() {
+        SkewStats emptyStats = new SkewStats(0.0, 0, 0);
+        totalSkewStats.set(emptyStats);
+        usedSkewStats.set(emptyStats);
+        availSkewStats.set(emptyStats);
+        availPercentSkewStats.set(emptyStats);
+    }
 }

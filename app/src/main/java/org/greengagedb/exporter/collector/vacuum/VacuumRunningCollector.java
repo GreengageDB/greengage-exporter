@@ -144,5 +144,10 @@ public class VacuumRunningCollector extends AbstractEntityCollector<String, Vacu
     protected boolean shouldRemoveDeletedMetrics() {
         return true;
     }
+
+    @Override
+    protected void resetCollectorState() {
+        vacuumIsRunning.set(false);
+    }
 }
 

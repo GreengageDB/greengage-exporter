@@ -21,15 +21,18 @@ import io.smallrye.config.WithDefault;
 import java.time.Duration;
 
 /**
- * Configuration for scraping
+ * Configuration for cluster datasource
  */
-@ConfigMapping(prefix = "app.scrape")
-public interface ScrapeConfig {
+@ConfigMapping(prefix = "app.datasource")
+public interface DatasourceConfig {
 
-    @WithDefault("15s")
-    Duration interval();
+    @WithDefault("30s")
+    Duration updateRoleInterval();
 
-    @WithDefault("true")
-    boolean resetCounters();
+    @WithDefault("/usr/lib/gpdb/bin")
+    String binPath();
+
+    @WithDefault("/data1/master/gpseg-1")
+    String masterDataDirectory();
+
 }
-
