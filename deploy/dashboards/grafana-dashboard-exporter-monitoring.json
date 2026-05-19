@@ -69,7 +69,7 @@
       "options": {
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -87,7 +87,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_exporter_uptime_seconds{cluster=~\"$cluster\"}",
+          "editorMode": "code",
+          "expr": "greengage_exporter_uptime_seconds{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -146,7 +149,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_exporter_total_scraped_total{cluster=~\"$cluster\"}",
+          "editorMode": "code",
+          "expr": "greengage_exporter_total_scraped_total{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -191,7 +197,7 @@
       "options": {
         "colorMode": "background",
         "graphMode": "area",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -209,7 +215,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_exporter_total_error_total{cluster=~\"$cluster\"}",
+          "editorMode": "code",
+          "expr": "greengage_exporter_total_error_total{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -276,7 +285,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_exporter_scrape_duration_seconds_max{cluster=~\"$cluster\"}",
+          "editorMode": "code",
+          "expr": "greengage_exporter_scrape_duration_seconds_max{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -343,7 +355,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(greengage_exporter_scrape_duration_seconds_sum{cluster=~\"$cluster\"}[5m]) / rate(greengage_exporter_scrape_duration_seconds_count{cluster=~\"$cluster\"}[5m])",
+          "editorMode": "code",
+          "expr": "rate(greengage_exporter_scrape_duration_seconds_sum{cluster_name=~\"$cluster_name\"}[5m]) / rate(greengage_exporter_scrape_duration_seconds_count{cluster_name=~\"$cluster_name\"}[5m])",
+          "legendFormat": "{{cluster_name}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -438,8 +453,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_exporter_scrape_duration_seconds_max{cluster=~\"$cluster\"}",
-          "legendFormat": "{{cluster}} - Max Duration",
+          "expr": "greengage_exporter_scrape_duration_seconds_max{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}} - Max Duration",
           "refId": "A"
         },
         {
@@ -447,8 +462,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(greengage_exporter_scrape_duration_seconds_sum{cluster=~\"$cluster\"}[5m]) / rate(greengage_exporter_scrape_duration_seconds_count{cluster=~\"$cluster\"}[5m])",
-          "legendFormat": "{{cluster}} - Average Duration",
+          "expr": "rate(greengage_exporter_scrape_duration_seconds_sum{cluster_name=~\"$cluster_name\"}[5m]) / rate(greengage_exporter_scrape_duration_seconds_count{cluster_name=~\"$cluster_name\"}[5m])",
+          "legendFormat": "{{cluster_name}} - Average Duration",
           "refId": "B"
         }
       ],
@@ -554,8 +569,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(greengage_exporter_total_scraped_total{cluster=~\"$cluster\"}[5m])",
-          "legendFormat": "{{cluster}} - Scrape Rate",
+          "expr": "rate(greengage_exporter_total_scraped_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "legendFormat": "{{cluster_name}} - Scrape Rate",
           "refId": "A"
         },
         {
@@ -563,8 +578,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(greengage_exporter_total_error_total{cluster=~\"$cluster\"}[5m])",
-          "legendFormat": "{{cluster}} - Error Rate",
+          "expr": "rate(greengage_exporter_total_error_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "legendFormat": "{{cluster_name}} - Error Rate",
           "refId": "B"
         }
       ],
@@ -665,8 +680,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_exporter_collector_duration_seconds{cluster=~\"$cluster\"}",
-          "legendFormat": "{{collector}}",
+          "editorMode": "code",
+          "expr": "greengage_exporter_collector_duration_seconds{cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}} - {{collector}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -771,8 +788,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "ft_circuitbreaker_state_current{state=\"closed\",cluster=~\"$cluster\"}",
-          "legendFormat": "{{method}} - Closed",
+          "editorMode": "code",
+          "expr": "ft_circuitbreaker_state_current{state=\"closed\",cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}} - {{method}} - Closed",
+          "range": true,
           "refId": "A"
         },
         {
@@ -780,8 +799,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "ft_circuitbreaker_state_current{state=\"open\",cluster=~\"$cluster\"}",
-          "legendFormat": "{{method}} - Open",
+          "editorMode": "code",
+          "expr": "ft_circuitbreaker_state_current{state=\"open\",cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}} - {{method}} - Open",
+          "range": true,
           "refId": "B"
         },
         {
@@ -789,8 +810,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "ft_circuitbreaker_state_current{state=\"halfOpen\",cluster=~\"$cluster\"}",
-          "legendFormat": "{{method}} - Half Open",
+          "editorMode": "code",
+          "expr": "ft_circuitbreaker_state_current{state=\"halfOpen\",cluster_name=~\"$cluster_name\"}",
+          "legendFormat": "{{cluster_name}} - {{method}} - Half Open",
+          "range": true,
           "refId": "C"
         }
       ],
@@ -896,8 +919,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "increase(ft_circuitbreaker_opened_total{cluster=~\"$cluster\"}[5m])",
-          "legendFormat": "{{method}} - Opened",
+          "editorMode": "code",
+          "expr": "increase(ft_circuitbreaker_opened_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "legendFormat": "{{cluster_name}} - {{method}} - Opened",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -1003,8 +1028,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(ft_circuitbreaker_calls_total{cluster=~\"$cluster\"}[5m])",
-          "legendFormat": "{{method}} - {{circuitBreakerResult}}",
+          "editorMode": "code",
+          "expr": "rate(ft_circuitbreaker_calls_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "legendFormat": "{{cluster_name}} - {{method}} - {{circuitBreakerResult}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -1123,8 +1150,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(ft_timeout_calls_total{cluster=~\"$cluster\"}[5m])",
-          "legendFormat": "{{method}} - timedOut={{timedOut}}",
+          "editorMode": "code",
+          "expr": "rate(ft_timeout_calls_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "legendFormat": "{{cluster_name}} - {{method}} - timedOut={{timedOut}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -1215,8 +1244,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(ft_timeout_executionDuration_seconds_sum{cluster=~\"$cluster\"}[5m]) / rate(ft_timeout_executionDuration_seconds_count{cluster=~\"$cluster\"}[5m])",
-          "legendFormat": "{{method}} - Average Execution Duration",
+          "editorMode": "code",
+          "expr": "rate(ft_timeout_executionDuration_seconds_sum{cluster_name=~\"$cluster_name\"}[5m]) / rate(ft_timeout_executionDuration_seconds_count{cluster_name=~\"$cluster_name\"}[5m])",
+          "legendFormat": "{{cluster_name}} - {{method}} - Average Execution Duration",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -1322,8 +1353,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(ft_retry_calls_total{cluster=~\"$cluster\"}[5m])",
-          "legendFormat": "{{method}} - retried={{retried}}, result={{retryResult}}",
+          "editorMode": "code",
+          "expr": "rate(ft_retry_calls_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "legendFormat": "{{cluster_name}} - {{method}} - retried={{retried}}, result={{retryResult}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -1413,8 +1446,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "increase(ft_retry_retries_total{cluster=~\"$cluster\"}[5m])",
-          "legendFormat": "{{method}} - Total Retries",
+          "editorMode": "code",
+          "expr": "increase(ft_retry_retries_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "legendFormat": "{{cluster_name}} - {{method}} - Total Retries",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -1533,8 +1568,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(ft_invocations_total{cluster=~\"$cluster\"}[5m])",
-          "legendFormat": "{{method}} - {{result}}",
+          "editorMode": "code",
+          "expr": "rate(ft_invocations_total{cluster_name=~\"$cluster_name\"}[5m])",
+          "legendFormat": "{{cluster_name}} - {{method}} - {{result}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -1576,15 +1613,15 @@
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(greengage_up, cluster)",
+        "definition": "label_values(greengage_up, cluster_name)",
         "hide": 0,
         "includeAll": true,
         "label": "Cluster",
         "multi": true,
-        "name": "cluster",
+        "name": "cluster_name",
         "options": [],
         "query": {
-          "query": "label_values(greengage_up, cluster)",
+          "query": "label_values(greengage_up, cluster_name)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
