@@ -39,6 +39,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.greengagedb.exporter.model.ClusterRole.DISPATCHER;
 import static org.greengagedb.exporter.model.ClusterRole.STANDBY;
@@ -53,6 +55,7 @@ public class DatabaseService {
     private static final String DATABASE_CLUSTER_STATE_UTILITY_PATH_TEMPLATE = "%s/pg_controldata";
     private static final String DATABASE_CLUSTER_STATE_PROPERTY_NAME = "Database cluster state";
     private static final String DATABASE_CLUSTER_STATE_COMMAND_TEMPLATE = "%s %s | grep '%s'";
+    private static final Pattern CLUSTER_STATE_PATTERN = Pattern.compile(DATABASE_CLUSTER_STATE_PROPERTY_NAME  + ":\\s*([^\\r\\n]+)");
     private final AgroalDataSource dataSource;
     private final BashExecutorService bashExecutorService;
     private final LiquibaseMigrationService migrationService;
@@ -191,11 +194,14 @@ public class DatabaseService {
             throw new RuntimeException("Check that the correct value is set for the app.datasource.bin-path property" +
                     " or the DATASOURCE_BIN_PATH variable. " + e.getMessage(), e);
         }
-        String clusterStateValue = bashExecutorService.run(DATABASE_CLUSTER_STATE_COMMAND_TEMPLATE
-                        .formatted(command, datasourceConfig.masterDataDirectory(), DATABASE_CLUSTER_STATE_PROPERTY_NAME))
-                .replace(DATABASE_CLUSTER_STATE_PROPERTY_NAME + ":", "")
-                .trim();
-        Optional<DatabaseClusterState> optionalClusterState = DatabaseClusterState.getByValue(clusterStateValue);
+        String stateOutput = bashExecutorService.run(DATABASE_CLUSTER_STATE_COMMAND_TEMPLATE
+                        .formatted(command, datasourceConfig.masterDataDirectory(), DATABASE_CLUSTER_STATE_PROPERTY_NAME));
+        Matcher matcher = CLUSTER_STATE_PATTERN.matcher(stateOutput);
+        if (!matcher.find()) {
+            log.warn("Could not find '{}' in the output: {}", DATABASE_CLUSTER_STATE_PROPERTY_NAME, stateOutput);
+            return STANDBY;
+        }
+        Optional<DatabaseClusterState> optionalClusterState = DatabaseClusterState.getByValue(matcher.group(1).trim());
         if (optionalClusterState.isEmpty()) {
             return STANDBY;
         }
