@@ -21,9 +21,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Factory for creating per-database DataSource instances.
@@ -42,6 +45,8 @@ public class DbDatasourceFactory {
 
     private static final int CONNECTION_POOL_SIZE = 1;
     private static final int CONNECTION_MAX_LIFETIME_SECONDS = 120;
+    private static final String POSTGRES_JDBC_DRIVER_PREFIX = "jdbc:postgresql://";
+    private static final String MESSAGE_TEMPLATE = "Created JDBC URL for database '{}'(encoded name is '{}'): {}";
 
     @ConfigProperty(name = "quarkus.datasource.jdbc.url")
     String jdbcUrl;
@@ -51,6 +56,11 @@ public class DbDatasourceFactory {
 
     @ConfigProperty(name = "quarkus.datasource.password")
     String password;
+
+    // Keep original query parameters because they may contain connection options
+    // such as sslmode, connectTimeout, targetServerType, etc.
+    @ConfigProperty(name = "app.datasource.preserve-jdbc-url-parameters")
+    boolean preserveJdbcUrlParameters;
 
     /**
      * Create a new DataSource for the specified database.
@@ -91,9 +101,38 @@ public class DbDatasourceFactory {
      * @return Modified JDBC URL pointing to the specified database
      */
     public String createJdbcUrlForDatabase(String databaseName) {
-        String modifiedUrl = jdbcUrl.replaceAll("(/)([^/]+)$", "/" + databaseName);
-        log.trace("Created JDBC URL for database '{}': {}", databaseName, modifiedUrl);
+        Properties props = org.postgresql.Driver.parseURL(jdbcUrl, null);
+        if (props == null) {
+            throw new IllegalArgumentException("Invalid PostgreSQL JDBC URL: " + jdbcUrl);
+        }
+        // To support databases with special symbols
+        String encodedDatabaseName = URLEncoder.encode(databaseName, StandardCharsets.UTF_8);
+        String modifiedUrl = getModifiedUrl(encodedDatabaseName);
+        log.debug(MESSAGE_TEMPLATE, databaseName, encodedDatabaseName, modifiedUrl);
         return modifiedUrl;
+    }
+
+    private String getModifiedUrl(String encodedDatabaseName) {
+        int queryStart = jdbcUrl.indexOf('?');
+        String mainPart = queryStart >= 0 ? jdbcUrl.substring(0, queryStart) : jdbcUrl;
+        String queryPart = getQueryPart(queryStart);
+        if (mainPart.startsWith(POSTGRES_JDBC_DRIVER_PREFIX)) {
+            int slashAfterHost = mainPart.indexOf('/', POSTGRES_JDBC_DRIVER_PREFIX.length());
+            if (slashAfterHost < 0) {
+                return mainPart + "/" + encodedDatabaseName + queryPart;
+            } else {
+                return mainPart.substring(0, slashAfterHost + 1) + encodedDatabaseName + queryPart;
+            }
+        } else {
+            return "jdbc:postgresql:" + encodedDatabaseName + queryPart;
+        }
+    }
+
+    private String getQueryPart(int queryStart) {
+        if (preserveJdbcUrlParameters) {
+            return queryStart >= 0 ? jdbcUrl.substring(queryStart) : "";
+        }
+        return "";
     }
 
     /**
@@ -105,12 +144,6 @@ public class DbDatasourceFactory {
     private void validateDatabaseName(String databaseName) {
         if (databaseName == null || databaseName.trim().isEmpty()) {
             throw new IllegalArgumentException("Database name cannot be null or empty");
-        }
-
-        // Basic validation: database names should not contain suspicious characters
-        if (databaseName.contains(";") || databaseName.contains("'") ||
-                databaseName.contains("\"") || databaseName.contains("--")) {
-            throw new IllegalArgumentException("Database name contains invalid characters: " + databaseName);
         }
     }
 }

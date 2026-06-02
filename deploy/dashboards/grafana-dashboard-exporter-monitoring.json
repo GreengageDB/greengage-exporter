@@ -1637,7 +1637,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(greengage_cluster_state{cluster_name=~\"$cluster_name\"},instance)",
         "hide": 0,

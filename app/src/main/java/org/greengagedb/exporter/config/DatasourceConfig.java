@@ -35,4 +35,7 @@ public interface DatasourceConfig {
     @WithDefault("/data1/master/gpseg-1")
     String masterDataDirectory();
 
+    @WithDefault("true")
+    boolean preserveJdbcUrlParameters();
+
 }

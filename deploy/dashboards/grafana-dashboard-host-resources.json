@@ -1695,7 +1695,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "greengage_host_database_name_mb_size{cluster_name=~\"$cluster_name\",instance=~\"$instance\",dbname=~\"$dbname\"}",
+          "expr": "greengage_host_database_name_mb_size{cluster_name=~\"$cluster_name\",instance=~\"$instance\",dbname=~`${dbname:regex}`}",
           "legendFormat": "{{cluster_name}} - {{dbname}}",
           "range": true,
           "refId": "A"
@@ -2096,7 +2096,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(greengage_cluster_state{cluster_name=~\"$cluster_name\"},instance)",
         "hide": 0,
