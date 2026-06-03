@@ -425,7 +425,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "topk($topk, greengage_database_table_seconds_since_last_vacuum{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~\"$database\",schema=~\"$schema\"})",
+          "expr": "topk($topk, greengage_database_table_seconds_since_last_vacuum{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~`${database:regex}`,schema=~\"$schema\"})",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -533,7 +533,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (database) (greengage_database_table_vacuum_count{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~\"$database\",schema=~\"$schema\"})",
+          "expr": "sum by (database) (greengage_database_table_vacuum_count{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~`${database:regex}`,schema=~\"$schema\"})",
           "legendFormat": "{{database}} - Manual Vacuum",
           "refId": "A"
         },
@@ -542,7 +542,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (database) (greengage_database_table_autovacuum_count{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~\"$database\",schema=~\"$schema\"})",
+          "expr": "sum by (database) (greengage_database_table_autovacuum_count{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~`${database:regex}`,schema=~\"$schema\"})",
           "legendFormat": "{{database}} - Auto Vacuum",
           "refId": "B"
         }
@@ -634,7 +634,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "topk($topk, greengage_database_table_dead_tuple_ratio{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~\"$database\",schema=~\"$schema\"})",
+          "expr": "topk($topk, greengage_database_table_dead_tuple_ratio{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~`${database:regex}`,schema=~\"$schema\"})",
           "legendFormat": "{{cluster_name}} - {{database}}.{{schema}}.{{table}}",
           "range": true,
           "refId": "A"
@@ -768,7 +768,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "greengage_server_table_bloat_state{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~\"$database\",schema=~\"$schema\"} > 0",
+          "expr": "greengage_server_table_bloat_state{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~`${database:regex}`,schema=~\"$schema\"} > 0",
           "legendFormat": "{{cluster_name}} - {{database}}.{{schema}}.{{table}}",
           "range": true,
           "refId": "A"
@@ -869,7 +869,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "topk($topk, greengage_server_table_skew_factor{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~\"$database\",schema=~\"$schema\"} > 1.5)",
+          "expr": "topk($topk, greengage_server_table_skew_factor{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~`${database:regex}`,schema=~\"$schema\"} > 1.5)",
           "legendFormat": "{{cluster_name}} - {{database}}.{{schema}}.{{table}}",
           "range": true,
           "refId": "A"
@@ -996,7 +996,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "greengage_server_table_bloat_state{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~\"$database\",schema=~\"$schema\"} > 0",
+          "expr": "greengage_server_table_bloat_state{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~`${database:regex}`,schema=~\"$schema\"} > 0",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -1119,7 +1119,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "topk($topk, greengage_server_table_skew_factor{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~\"$database\",schema=~\"$schema\"})",
+          "expr": "topk($topk, greengage_server_table_skew_factor{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~`${database:regex}`,schema=~\"$schema\"})",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -1203,7 +1203,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(greengage_cluster_state{cluster_name=~\"$cluster_name\"},instance)",
         "hide": 0,

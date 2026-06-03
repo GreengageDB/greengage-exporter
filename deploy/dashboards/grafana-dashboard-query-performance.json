@@ -1309,7 +1309,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (cluster_name,lock_type,mode,content) (greengage_server_lock_wait_max_wait_seconds{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~\"$database\"})",
+          "expr": "sum by (cluster_name,lock_type,mode,content) (greengage_server_lock_wait_max_wait_seconds{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~`${database:regex}`})",
           "instant": true,
           "legendFormat": "{{cluster_name}} - {{lock_type}} - {{mode}} (segment={{content}})",
           "refId": "A"
@@ -1385,7 +1385,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (cluster_name,lock_type,mode,content) (greengage_server_lock_waiting_queries{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~\"$database\"})",
+          "expr": "sum by (cluster_name,lock_type,mode,content) (greengage_server_lock_waiting_queries{cluster_name=~\"$cluster_name\",instance=~\"$instance\",database=~`${database:regex}`})",
           "instant": true,
           "legendFormat": "{{cluster_name}} - {{lock_type}} - {{mode}} (segment={{content}})",
           "refId": "A"
@@ -1453,7 +1453,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(greengage_cluster_state{cluster_name=~\"$cluster_name\"},instance)",
         "hide": 0,
