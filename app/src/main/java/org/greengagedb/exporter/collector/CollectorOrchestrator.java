@@ -282,7 +282,7 @@ public class CollectorOrchestrator {
         try {
             log.debug("Collecting metrics from: {}{}", collector.getName(), logSuffix);
             collector.collect(connection, version);
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             handleCollectorFailure(collector, context, e, logSuffix);
         } finally {
             long durationMs = System.currentTimeMillis() - collectionStart;
@@ -295,7 +295,7 @@ public class CollectorOrchestrator {
      * Handle collector failure with fail-fast logic.
      */
     private void handleCollectorFailure(Collector collector, CollectorExecutionContext context,
-                                        Exception e, String logSuffix) throws SQLException {
+                                        Throwable e, String logSuffix) throws SQLException {
         context.failures++;
         log.error("Error collecting metrics from {}{} ({}/{} failures): {}",
                 collector.getName(), logSuffix, context.failures, context.failureThreshold, e.getMessage(), e);
