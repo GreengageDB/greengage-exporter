@@ -13,9 +13,9 @@ Wants=network-online.target
 Type=simple
 
 # Service user/group - create with:
-#   useradd --system --shell /sbin/nologin gpadmin
-User=gpadmin
-Group=gpadmin
+#   useradd --system --shell /sbin/nologin ggexporter
+User=ggexporter
+Group=ggexporter
 
 # Environment configuration file
 # Create from env.example and place at this path
@@ -26,9 +26,9 @@ WorkingDirectory=/opt/greengage-exporter
 
 # Execution command
 # For JVM version:
-ExecStart=/opt/greengage-exporter/bin/greengage-exporter
+#ExecStart=/opt/greengage-exporter/greengage-exporter
 # For native version:
-#ExecStart=/opt/greengage-exporter/bin/greengage-exporter -Dquarkus.http.host=0.0.0.0
+ExecStart=/opt/greengage-exporter/greengage-exporter -Dquarkus.http.host=0.0.0.0 -Dorg.sqlite.tmpdir=/opt/greengage-exporter
 
 # Restart policy
 Restart=on-failure
@@ -54,4 +54,3 @@ TasksMax=100
 
 [Install]
 WantedBy=multi-user.target
-
