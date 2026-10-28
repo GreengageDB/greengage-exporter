@@ -23,6 +23,7 @@ import org.greengagedb.exporter.config.CollectorsConfig;
 import org.greengagedb.exporter.config.OrchestratorConfig;
 import org.greengagedb.exporter.config.PerDBMode;
 import org.greengagedb.exporter.connection.DbConnectionProvider;
+import org.greengagedb.exporter.exeption.CollectorWarningException;
 import org.greengagedb.exporter.gg.DatabaseService;
 import org.greengagedb.exporter.metrics.ExporterMetrics;
 import org.greengagedb.exporter.model.GreengageVersion;
@@ -297,8 +298,13 @@ public class CollectorOrchestrator {
     private void handleCollectorFailure(Collector collector, CollectorExecutionContext context,
                                         Throwable e, String logSuffix) throws SQLException {
         context.failures++;
-        log.error("Error collecting metrics from {}{} ({}/{} failures): {}",
-                collector.getName(), logSuffix, context.failures, context.failureThreshold, e.getMessage(), e);
+        if (e instanceof CollectorWarningException) {
+            log.warn("Warning collecting metrics from {}{} ({}/{} failures): {}",
+                    collector.getName(), logSuffix, context.failures, context.failureThreshold, e.getMessage());
+        } else {
+            log.error("Error collecting metrics from {}{} ({}/{} failures): {}",
+                    collector.getName(), logSuffix, context.failures, context.failureThreshold, e.getMessage(), e);
+        }
         exporterMetrics.incrementTotalError();
         exporterMetrics.incrementCollectorError(collector.getName());
 
