@@ -26,7 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.greengagedb.exporter.collector.AbstractEntityCollector;
 import org.greengagedb.exporter.common.Constants;
 import org.greengagedb.exporter.common.MetricNameBuilder;
+import org.greengagedb.exporter.exeption.CollectorWarningException;
 import org.greengagedb.exporter.model.GreengageVersion;
+import org.sqlite.SQLiteErrorCode;
+import org.sqlite.SQLiteException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -142,10 +145,21 @@ public class GpBackupHistoryCollector extends AbstractEntityCollector<GpBackupHi
                 entitiesMap.put(info.key(), info);
             }
         } catch (Exception e) {
-            log.error("Error collecting gpbackup history stats: {}", e.getMessage());
-            throw e;
+            if (isBackupHistoryDatabaseUnavailable(e)) {
+                throw new CollectorWarningException("Greengage backup history database is unavailable: " + e.getMessage(), e);
+            } else {
+                throw e;
+            }
         }
         return entitiesMap;
+    }
+
+    @Override
+    protected void onCollectError(SQLException e) {
+        if (e instanceof CollectorWarningException) {
+            return;
+        }
+        super.onCollectError(e);
     }
 
     @Override
@@ -198,6 +212,13 @@ public class GpBackupHistoryCollector extends AbstractEntityCollector<GpBackupHi
     @Override
     protected boolean shouldRemoveDeletedMetrics() {
         return true;
+    }
+
+    private boolean isBackupHistoryDatabaseUnavailable(Throwable exception) {
+        if (exception instanceof SQLiteException sqliteException) {
+            return sqliteException.getResultCode() == SQLiteErrorCode.SQLITE_CANTOPEN;
+        }
+        return false;
     }
 }
 
