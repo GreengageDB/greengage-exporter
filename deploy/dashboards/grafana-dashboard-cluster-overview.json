@@ -1281,24 +1281,18 @@
         "type": "datasource"
       },
       {
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
         "datasource": {
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(greengage_up, cluster_name)",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Cluster",
         "multi": true,
         "name": "cluster_name",
         "options": [],
         "query": {
-          "query": "label_values(greengage_up, cluster_name)",
+          "query": "label_values(greengage_up{cluster_name=~\".*\"}, cluster_name)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
