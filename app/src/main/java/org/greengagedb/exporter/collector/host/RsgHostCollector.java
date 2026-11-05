@@ -29,10 +29,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -69,6 +66,20 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
                                    and c.content >= 0)
             ORDER BY r.rsgname, h.hostname""";
 
+    private static final String RG_MEMORY_LIMIT_SQL_V6 = """
+            WITH segment_memory_limits AS (
+                SELECT gp_execution_segment() AS content,
+                       setting::double precision AS memory_limit
+                FROM gp_dist_random('pg_settings')
+                WHERE name = 'gp_resource_group_memory_limit'
+            )
+            SELECT sc.hostname,
+                   AVG(sml.memory_limit) AS memory_limit
+            FROM gp_segment_configuration sc
+                     JOIN segment_memory_limits sml ON sml.content = sc.content
+            WHERE sc.role = 'p' AND sc.status = 'u' AND sc.content >= 0
+            GROUP BY sc.hostname""";
+
     private static final String SQL_V7 = """
             SELECT r.rsgname,
                    h.hostname,
@@ -87,6 +98,21 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
                                  where c.role = 'p'
                                    and c.content >= 0)
             ORDER BY r.rsgname, h.hostname""";
+
+    private static final String RG_MEMORY_LIMIT_SQL_V7 = """
+            WITH segment_vmem_limits AS (
+                SELECT gp_execution_segment() AS content,
+                       setting::bigint AS memory_limit
+                FROM gp_dist_random('pg_settings')
+                WHERE name = 'gp_vmem_protect_limit'
+            )
+            SELECT sc.hostname,
+                   SUM(sml.memory_limit) AS memory_limit -- We use SUM as we calculate value per host taking into account every active segment 
+            FROM gp_segment_configuration sc
+                     JOIN segment_vmem_limits sml ON sml.content = sc.content
+            WHERE sc.role = 'p' AND sc.status = 'u' AND sc.content >= 0
+            GROUP BY sc.hostname""";
+
     private final AtomicReference<SkewStats> cpuStats = new AtomicReference<>(new SkewStats(0.0, 0, 0));
     private final AtomicReference<SkewStats> memStats = new AtomicReference<>(new SkewStats(0.0, 0, 0));
     private final AtomicInteger fullMemoryLimit = new AtomicInteger();
@@ -104,21 +130,24 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
     @Override
     protected Map<RsgKey, RsgHostStats> collectEntities(Connection connection,
                                                         GreengageVersion version) throws SQLException {
+        Map<String, HostMemoryLimit> hostMemoryLimits = getHostMemoryLimits(connection, version);
         Map<RsgKey, RsgHostStats.HostValues> hostValuesMap = new HashMap<>();
         Map<RsgKey, RsgHostStats.RsgValues> rsgValuesMap = new HashMap<>();
         var sql = version.isAtLeastVersion7() ? SQL_V7 : SQL_V6;
         try (Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
+                String hostname = rs.getString("hostname");
                 var stats = new RsgHostValues(
                         rs.getString("rsgname"),
-                        rs.getString("hostname"),
+                        hostname,
                         rs.getInt("num_running"),
                         rs.getInt("num_queueing"),
                         rs.getInt("cpu_rate_limit"),
                         rs.getInt("cpu_usage"),
                         rs.getInt("memory_limit"),
-                        rs.getInt("memory_usage")
+                        rs.getInt("memory_usage"),
+                        hostMemoryLimits.get(hostname)
                 );
                 var hostKey = new RsgKey(RsgKey.GroupType.HOST, stats.hostname() + ":" + stats.resourceGroupName());
                 hostValuesMap.put(hostKey, RsgHostStats.HostValues.of(stats));
@@ -183,6 +212,20 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
                     .tag("limit", hostValues.cpuRateLimit() > 0 ? String.valueOf(hostValues.cpuRateLimit()) : "unlimited")
                     .tag("hostname", hostValues.hostname())
                     .register(registry).getId());
+            HostMemoryLimit memoryLimit = hostValues.hostMemoryLimit();
+            if (memoryLimit != null) {
+                meterIds.add(Gauge.builder(MetricNameBuilder.build(Constants.SUBSYSTEM_HOST, memoryLimit.metricName()),
+                                () -> {
+                                    var stats = valueSupplier.get();
+                                    return stats != null && stats.hostValues().hostMemoryLimit() != null
+                                            ? stats.hostValues().hostMemoryLimit().value()
+                                            : Double.NaN;
+                                })
+                        .description(memoryLimit.description())
+                        .tag("resourceGroupName", hostValues.resourceGroupName())
+                        .tag("hostname", hostValues.hostname())
+                        .register(registry).getId());
+            }
         } else if (key.groupBy() == RsgKey.GroupType.RESOURCE_GROUP) {
             meterIds.add(Gauge.builder(MetricNameBuilder.build(Constants.SUBSYSTEM_HOST, "num_running_sessions"),
                             () -> {
@@ -310,5 +353,21 @@ public class RsgHostCollector extends AbstractEntityCollector<RsgKey, RsgHostSta
         cpuStats.set(emptyStats);
         memStats.set(emptyStats);
         fullMemoryLimit.set(0);
+    }
+
+    private Map<String, HostMemoryLimit> getHostMemoryLimits(Connection connection, GreengageVersion version) throws SQLException {
+        String sql = version.isAtLeastVersion7() ? RG_MEMORY_LIMIT_SQL_V7 : RG_MEMORY_LIMIT_SQL_V6;
+        Map<String, HostMemoryLimit> limits = new HashMap<>();
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                double value = rs.getDouble("memory_limit");
+                HostMemoryLimit limit = version.isAtLeastVersion7()
+                        ? new HostMemoryLimit.v7(value)
+                        : new HostMemoryLimit.v6(value);
+                limits.put(rs.getString("hostname"), limit);
+            }
+        }
+        return limits;
     }
 }
