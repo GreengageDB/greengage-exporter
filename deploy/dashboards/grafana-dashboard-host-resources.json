@@ -463,9 +463,18 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "(avg by (hostname, resourceGroupName) (greengage_host_mem_usage_mb{cluster_name=~\"$cluster_name\",instance=~\"$instance\",resourceGroupName=~\"$resource_group\"})/ on (resourceGroupName) group_left() (label_replace(node_memory_MemTotal_bytes, \"host\", \"$1\", \"instance\", \"([^.:]+)[.:].*\" ) * on(host) group_right() (label_replace(greengage_host_mem_limit_percent_value{cluster_name=~\"$cluster_name\",instance=~\"$instance\",resourceGroupName=~\"$resource_group\"}, \"host\", \"$1\", \"instance\", \"([^.:]+)[.:].*\")  / 100)/ 1024 / 1024)) * 100 > 0",
+          "expr": "(avg by (cluster_name, hostname, resourceGroupName) (greengage_host_mem_usage_mb{cluster_name=~\"$cluster_name\",instance=~\"$instance\",hostname=~\"$hostname\",resourceGroupName=~\"$resource_group\"}) / on (cluster_name, resourceGroupName) group_left() (max by (cluster_name, resourceGroupName) (greengage_host_mem_limit_percent_value{cluster_name=~\"$cluster_name\",instance=~\"$instance\",resourceGroupName=~\"$resource_group\"}) / 100) / on (cluster_name, hostname, resourceGroupName) max by (cluster_name, hostname, resourceGroupName) (greengage_host_gp_resource_group_memory_limit{cluster_name=~\"$cluster_name\",hostname=~\"$hostname\",resourceGroupName=~\"$resource_group\"})) / on (cluster_name, hostname) group_left() max by (cluster_name, hostname) (label_replace(node_memory_CommitLimit_bytes{cluster_name=~\"$cluster_name\"} / 1024 / 1024, \"hostname\", \"$1\", \"instance\", \"([^.:]+)[.:].*\")) * 100 > 0",
           "legendFormat": "{{hostname}} - {{resourceGroupName}} - Usage/Limit",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "(avg by (cluster_name, hostname, resourceGroupName) (greengage_host_mem_usage_mb{cluster_name=~\"$cluster_name\",instance=~\"$instance\",hostname=~\"$hostname\",resourceGroupName=~\"$resource_group\"}) / on (cluster_name, hostname, resourceGroupName) max by (cluster_name, hostname, resourceGroupName) (greengage_host_gp_vmem_protect_limit_per_host_mb{cluster_name=~\"$cluster_name\",instance=~\"$instance\",hostname=~\"$hostname\",resourceGroupName=~\"$resource_group\"})) / on (cluster_name, resourceGroupName) group_left() (max by (cluster_name, resourceGroupName) (greengage_host_mem_limit_percent_value{cluster_name=~\"$cluster_name\",instance=~\"$instance\",resourceGroupName=~\"$resource_group\"}) / 100) * 100 > 0",
+          "legendFormat": "{{hostname}} - {{resourceGroupName}} - Usage/Limit",
+          "refId": "B"
         }
       ],
       "title": "Memory Usage vs Limit (% of Limit Used) - LIMITED GROUPS ONLY",

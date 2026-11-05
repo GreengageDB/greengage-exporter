@@ -44,7 +44,7 @@ public record SkewStats(
         return new SkewStats(
                 skewRawStats.getMax(),
                 skewRawStats.getAverage(),
-                skewRawStats.getMax() > 0 ? (long) (skewRawStats.getMax() / skewRawStats.getAverage()) : 0
+                skewRawStats.getAverage() > 0 ? (skewRawStats.getMax() / skewRawStats.getAverage()) : 0
         );
     }
 }
