@@ -88,7 +88,8 @@ public class GpBackupHistoryCollector extends AbstractEntityCollector<GpBackupHi
                                substr(end_ts, 7, 2) || ' ' ||
                                substr(end_ts, 9, 2) || ':' ||
                                substr(end_ts, 11, 2) || ':' ||
-                               substr(end_ts, 13, 2)
+                               substr(end_ts, 13, 2),
+                               'utc'
                        )
                        )         AS seconds_since_completion
             FROM ranked
