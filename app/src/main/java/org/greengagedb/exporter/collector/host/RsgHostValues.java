@@ -23,6 +23,8 @@ public record RsgHostValues(
         int cpuRateLimit,
         int cpuUsage,
         int memoryLimit,
-        int memoryUsage
+        int memoryUsage,
+        HostMemoryLimit hostMemoryLimit
 ) {
 }
+

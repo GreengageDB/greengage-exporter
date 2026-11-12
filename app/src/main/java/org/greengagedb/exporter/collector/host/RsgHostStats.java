@@ -33,7 +33,8 @@ public record RsgHostStats(
             int cpuUsage,
             int memoryUsage,
             int cpuRateLimit,
-            int memoryLimit
+            int memoryLimit,
+            HostMemoryLimit hostMemoryLimit
     ) {
         public static HostValues of(RsgHostValues values) {
             return new HostValues(
@@ -42,7 +43,8 @@ public record RsgHostStats(
                     values.cpuUsage(),
                     values.memoryUsage(),
                     values.cpuRateLimit(),
-                    values.memoryLimit()
+                    values.memoryLimit(),
+                    values.hostMemoryLimit()
             );
         }
     }
